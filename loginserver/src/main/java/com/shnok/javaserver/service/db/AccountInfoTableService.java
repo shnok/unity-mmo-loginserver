@@ -24,4 +24,8 @@ public class AccountInfoTableService {
     public void createAccount(DBAccountInfo accountInfo) {
         accountInfoRepository.createAccount(accountInfo);
     }
+
+    public void updateAccount(DBAccountInfo accountInfo) {
+        accountInfoRepository.updateAccount(accountInfo);
+    }
 }

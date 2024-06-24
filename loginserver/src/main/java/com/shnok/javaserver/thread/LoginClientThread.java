@@ -1,9 +1,11 @@
 package com.shnok.javaserver.thread;
 
 import com.shnok.javaserver.dto.external.ServerPacket;
+import com.shnok.javaserver.enums.AccountKickedReason;
 import com.shnok.javaserver.enums.LoginClientState;
 import com.shnok.javaserver.enums.LoginFailReason;
 import com.shnok.javaserver.enums.ServerPacketType;
+import com.shnok.javaserver.model.SessionKey;
 import com.shnok.javaserver.security.LoginCrypt;
 import com.shnok.javaserver.security.ScrambledKeyPair;
 import com.shnok.javaserver.service.LoginServerController;
@@ -32,12 +34,13 @@ public class LoginClientThread extends Thread {
     private boolean clientReady = false;
     private long lastEcho;
     private Timer watchDog;
-    private LoginClientState state;
+    private LoginClientState loginClientState;
     private final LoginCrypt loginCrypt;
     private final ScrambledKeyPair scrambledPair;
     private final byte[] blowfishKey;
     private int accessLevel;
     private int lastGameserver;
+    private SessionKey sessionKey;
 
     public LoginClientThread(Socket con) {
         connection = con;
@@ -93,17 +96,23 @@ public class LoginClientThread extends Thread {
             log.error("Exception while reading packets.");
         } finally {
             log.info("User {} disconnected", connectionIp);
-            removeSelf();
             disconnect();
         }
+    }
+
+    public void close(AccountKickedReason failReason) {
+        //TODO: Send kick reason
+        disconnect();
     }
 
     public void close(LoginFailReason failReason) {
         //TODO: Send fail reason
         disconnect();
     }
+
     public void disconnect() {
         try {
+            removeSelf();
             connection.close();
         } catch (IOException e) {
             log.error("Error while closing connection.", e);
@@ -150,7 +159,7 @@ public class LoginClientThread extends Thread {
 
     }
 
-    void removeSelf() {
+    private void removeSelf() {
         if (authenticated) {
             authenticated = false;
 

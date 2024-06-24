@@ -29,4 +29,15 @@ public class AccountInfoRepository implements AccountInfoDao {
             log.error("SQL ERROR: {}", e.getMessage(), e);
         }
     }
+
+    @Override
+    public void updateAccount(DBAccountInfo accountInfo) {
+        try (Session session = DbFactory.getSessionFactory().openSession()) {
+            session.beginTransaction();
+            session.saveOrUpdate(accountInfo);
+            session.getTransaction().commit();
+        } catch (Exception e) {
+            log.error("SQL ERROR: {}", e.getMessage(), e);
+        }
+    }
 }

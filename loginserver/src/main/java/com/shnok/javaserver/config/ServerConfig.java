@@ -46,4 +46,6 @@ public interface ServerConfig extends Mutable, Reloadable {
     Integer autoCreateAccountAccessLevel();
     @Key("server.account.inactive.access.level")
     Integer accountInactiveLevel();
+    @Key("server.show.license")
+    Boolean showLicense();
 }

@@ -1,6 +1,7 @@
 package com.shnok.javaserver.service;
 
 import com.shnok.javaserver.dto.external.ServerPacket;
+import com.shnok.javaserver.model.SessionKey;
 import com.shnok.javaserver.security.Rnd;
 import com.shnok.javaserver.security.ScrambledKeyPair;
 import com.shnok.javaserver.thread.LoginClientThread;
@@ -146,5 +147,13 @@ public class LoginServerController {
 
     public byte[] getBlowfishKey() {
         return blowfishKeys[(int) (Math.random() * BLOWFISH_KEYS)];
+    }
+
+    public SessionKey getNewSessionKey() {
+        return new SessionKey(Rnd.nextInt(), Rnd.nextInt(), Rnd.nextInt(), Rnd.nextInt());
+    }
+
+    public void getCharactersOnAccount(String account) {
+        // TODO: get character list for account
     }
 }

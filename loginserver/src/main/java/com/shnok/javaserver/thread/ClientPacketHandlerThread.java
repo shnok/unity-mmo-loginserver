@@ -2,12 +2,8 @@ package com.shnok.javaserver.thread;
 
 import com.shnok.javaserver.db.entity.DBAccountInfo;
 import com.shnok.javaserver.dto.external.clientpackets.AuthRequestPacket;
-import com.shnok.javaserver.dto.external.serverpackets.AuthResponsePacket;
-import com.shnok.javaserver.dto.external.serverpackets.PingPacket;
-import com.shnok.javaserver.enums.AuthLoginResult;
-import com.shnok.javaserver.enums.ClientPacketType;
-import com.shnok.javaserver.enums.LoginClientState;
-import com.shnok.javaserver.enums.LoginFailReason;
+import com.shnok.javaserver.dto.external.serverpackets.*;
+import com.shnok.javaserver.enums.*;
 import com.shnok.javaserver.service.LoginServerController;
 import com.shnok.javaserver.service.db.AccountInfoTableService;
 import lombok.extern.log4j.Log4j2;
@@ -66,7 +62,6 @@ public class ClientPacketHandlerThread extends Thread {
             public void actionPerformed(ActionEvent arg0) {
                 if (System.currentTimeMillis() - client.getLastEcho() >= server.serverConnectionTimeoutMs()) {
                     log.info("User connection timeout.");
-                    client.removeSelf();
                     client.disconnect();
                 }
             }
@@ -84,11 +79,12 @@ public class ClientPacketHandlerThread extends Thread {
 
         InetAddress clientAddr = client.getConnection().getInetAddress();
 
+        DBAccountInfo accountInfo;
         try {
             final MessageDigest md = MessageDigest.getInstance("SHA");
             final byte[] raw = password.getBytes(UTF_8);
             final String hashBase64 = Base64.getEncoder().encodeToString(md.digest(raw));
-            DBAccountInfo accountInfo = AccountInfoTableService.getInstance().getAccountInfo(username);
+            accountInfo = AccountInfoTableService.getInstance().getAccountInfo(username);
 
             if (accountInfo != null) {
                 if(!accountInfo.getPassHash().equals(hashBase64)) {
@@ -114,45 +110,53 @@ public class ClientPacketHandlerThread extends Thread {
             throw new RuntimeException(e);
         }
 
+        AuthLoginResult result = tryCheckinAccount(accountInfo);
 
-
-        AuthLoginResult result = lc.tryCheckinAccount(client, clientAddr, info);
         switch (result) {
-            case AUTH_SUCCESS -> {
-                client.setAccount(info.getLogin());
-                client.setState(LoginClientState.AUTHED_LOGIN);
-                client.setSessionKey(lc.assignSessionKeyToClient(info.getLogin(), client));
-                lc.getCharactersOnAccount(info.getLogin());
-                if (server().showLicense()) {
-                    client.sendPacket(new LoginOk(getClient().getSessionKey()));
+            case AUTH_SUCCESS:
+
+                client.setUsername(accountInfo.getLogin());
+                client.setLoginClientState(LoginClientState.AUTHED_LOGIN);
+                client.setSessionKey(LoginServerController.getInstance().getNewSessionKey());
+                LoginServerController.getInstance().getCharactersOnAccount(accountInfo.getLogin());
+
+                if (server.showLicense()) {
+                    client.sendPacket(new LoginOkPacket(client.getSessionKey()));
                 } else {
-                    getClient().sendPacket(new ServerList(getClient()));
+                    client.sendPacket(new ServerListPacket());
                 }
-            }
-            case INVALID_PASSWORD -> client.close(LoginFailReason.REASON_USER_OR_PASS_WRONG);
-            case ACCOUNT_INACTIVE -> client.close(LoginFailReason.REASON_INACTIVE);
-            case ACCOUNT_BANNED -> client.close(new AccountKicked(AccountKickedReason.REASON_PERMANENTLY_BANNED));
-            case ALREADY_ON_LS -> {
-                L2LoginClient oldClient = lc.getAuthedClient(info.getLogin());
+
+                break;
+
+            case INVALID_PASSWORD:
+                client.close(LoginFailReason.REASON_USER_OR_PASS_WRONG);
+                break;
+            case ACCOUNT_INACTIVE:
+                client.close(LoginFailReason.REASON_INACTIVE);
+                break;
+            case ACCOUNT_BANNED:
+                client.close(AccountKickedReason.REASON_PERMANENTLY_BANNED);
+                break;
+            case ALREADY_ON_LS:
+                LoginClientThread oldClient = LoginServerController.getInstance().getClient(accountInfo.getLogin());
                 if (oldClient != null) {
                     // kick the other client
                     oldClient.close(LoginFailReason.REASON_ACCOUNT_IN_USE);
-                    lc.removeAuthedLoginClient(info.getLogin());
                 }
                 // kick also current client
                 client.close(LoginFailReason.REASON_ACCOUNT_IN_USE);
-            }
-            case ALREADY_ON_GS -> {
-                GameServerInfo gsi = lc.getAccountOnGameServer(info.getLogin());
-                if (gsi != null) {
-                    client.close(LoginFailReason.REASON_ACCOUNT_IN_USE);
-
-                    // kick from there
-                    if (gsi.isAuthed()) {
-                        gsi.getGameServerThread().kickPlayer(info.getLogin());
-                    }
-                }
-            }
+                break;
+            case ALREADY_ON_GS:
+//                GameServerInfo gsi = lc.getAccountOnGameServer(info.getLogin());
+//                if (gsi != null) {
+//                    client.close(LoginFailReason.REASON_ACCOUNT_IN_USE);
+//
+//                    // kick from there
+//                    if (gsi.isAuthed()) {
+//                        gsi.getGameServerThread().kickPlayer(info.getLogin());
+//                    }
+//                }
+            break;
         }
     }
 
@@ -201,14 +205,11 @@ public class ClientPacketHandlerThread extends Thread {
             client.setAccessLevel(info.getAccessLevel());
             client.setLastGameserver(info.getLastServer());
 
+            info.setLastIp(client.getConnectionIp());
+            info.setLastActive(System.currentTimeMillis());
 
-            try (var con = ConnectionFactory.getInstance().getConnection();
-                 var ps = con.prepareStatement(ACCOUNT_INFO_UPDATE)) {
-                ps.setLong(1, System.currentTimeMillis());
-                ps.setString(2, address.getHostAddress());
-                ps.setString(3, info.getLogin());
-                ps.execute();
-            }
+            AccountInfoTableService.getInstance().updateAccount(info);
+
             return true;
         } catch (Exception ex) {
             log.warn("There has been an error logging in!", ex);
