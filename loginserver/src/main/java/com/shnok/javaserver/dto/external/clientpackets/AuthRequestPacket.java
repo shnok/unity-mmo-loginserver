@@ -1,7 +1,6 @@
 package com.shnok.javaserver.dto.external.clientpackets;
 
-import com.shnok.javaserver.dto.external.ClientPacket;
-import com.shnok.javaserver.thread.LoginClientThread;
+import com.shnok.javaserver.dto.SendablePacket;
 import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
 
@@ -11,7 +10,7 @@ import java.util.Arrays;
 
 @Getter
 @Log4j2
-public class AuthRequestPacket extends ClientPacket {
+public class AuthRequestPacket extends SendablePacket {
     private final byte[] raw = new byte[128];
 
     private String username;

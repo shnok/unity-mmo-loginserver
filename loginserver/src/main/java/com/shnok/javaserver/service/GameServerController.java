@@ -4,14 +4,18 @@ import com.shnok.javaserver.db.entity.DBGameServer;
 import com.shnok.javaserver.model.GameServerInfo;
 import com.shnok.javaserver.security.Rnd;
 import com.shnok.javaserver.service.db.GameServerTable;
+import com.shnok.javaserver.thread.GameServerThread;
+import com.shnok.javaserver.thread.LoginClientThread;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.log4j.Log4j2;
 
 import java.math.BigInteger;
+import java.net.Socket;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.spec.RSAKeyGenParameterSpec;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -20,12 +24,17 @@ import java.util.Map;
 @Getter
 @Setter
 public class GameServerController {
-
     private static final Map<Integer, GameServerInfo> GAME_SERVER_TABLE = new HashMap<>();
-
     private static final int KEYS_SIZE = 10;
-
     private KeyPair[] keyPairs;
+    private static GameServerController instance;
+
+    public static GameServerController getInstance() {
+        if (instance == null) {
+            instance = new GameServerController();
+        }
+        return instance;
+    }
 
     public GameServerController() {
         loadRegisteredGameServers();

@@ -1,8 +1,11 @@
 package com.shnok.javaserver.thread;
 
+import com.shnok.javaserver.dto.Packet;
+import com.shnok.javaserver.dto.internal.loginserverpackets.LoginServerFailPacket;
 import com.shnok.javaserver.enums.GameServerState;
 import com.shnok.javaserver.model.GameServerInfo;
 import com.shnok.javaserver.security.NewCrypt;
+import com.shnok.javaserver.service.GameServerListenerService;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.log4j.Log4j2;
@@ -29,14 +32,10 @@ public class GameServerThread extends Thread {
     private Socket connection;
     private RSAPublicKey publicKey;
     private RSAPrivateKey privateKey;
-
-    private NewCrypt _blowfish;
-
-    private GameServerState _loginConnectionState = GameServerState.CONNECTED;
-
+    private NewCrypt blowfish;
+    private GameServerState loginConnectionState = GameServerState.CONNECTED;
     private final String connectionIp;
-
-    private GameServerInfo _gsi;
+    private GameServerInfo gameServerInfo;
 
     /**
      * Authed Clients on a GameServer
@@ -52,7 +51,7 @@ public class GameServerThread extends Thread {
         try {
             in = connection.getInputStream();
             out = new BufferedOutputStream(connection.getOutputStream());
-            log.debug("New connection: {}" + connectionIp);
+            log.debug("New gameserver connection: {}", connectionIp);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -89,17 +88,96 @@ public class GameServerThread extends Thread {
                     receivedBytes = receivedBytes + newBytes;
                 }
 
-                //handlePacket(data);
+                handlePacket(data);
             }
         } catch (Exception e) {
             log.error("Exception while reading packets.");
         } finally {
-            log.info("User {} disconnected", connectionIp);
-          //  disconnect();
+            log.info("Gameserver {} connection closed.", connectionIp);
+            disconnect();
         }
+    }
+
+    private void handlePacket(byte[] data) {
+        // TODO: Handle gameserver packet
+    }
+
+
+    public void sendPacket(Packet packet) {
+        //TODO: send packet to game server
+    }
+
+    public void disconnect() {
+        try {
+            GameServerListenerService.getInstance().removeGameServer(this);
+            connection.close();
+        } catch (IOException e) {
+            log.error("Error while closing connection.", e);
+        }
+    }
+
+    public void attachGameServerInfo(GameServerInfo gsi, int port, String[] hosts, int maxPlayers) {
+        setGameServerInfo(gsi);
+        gsi.setGameServerThread(this);
+        gsi.setPort(port);
+        setGameHosts(hosts);
+        gsi.setMaxPlayers(maxPlayers);
+        gsi.setAuthed(true);
+    }
+
+    public void setGameHosts(String[] hosts) {
+        log.info("Updated game server {}[{}] IPs.", gameServerInfo.getName(), gameServerInfo.getId());
+
+        gameServerInfo.clearServerAddresses();
+        for (int i = 0; i < hosts.length; i += 2) {
+            try {
+                gameServerInfo.addServerAddress(hosts[i], hosts[i + 1]);
+            } catch (Exception ex) {
+                log.warn("There has been an error resolving host name {}!", hosts[i], ex);
+            }
+        }
+
+        for (String s : gameServerInfo.getServerAddresses()) {
+            log.info(s);
+        }
+    }
+
+    public void forceClose(int reason) {
+        sendPacket(new LoginServerFailPacket(reason));
+
+        try {
+            connection.close();
+        } catch (IOException ex) {
+            log.debug("Failed disconnecting banned server, server already disconnected.");
+        }
+    }
+
+    public static boolean isBannedGameServerIP(String ipAddress) {
+        return false;
     }
 
     public int getPlayerCount() {
         return accountsOnGameServer.size();
+    }
+
+    public boolean hasAccountOnGameServer(String account) {
+        return accountsOnGameServer.contains(account);
+    }
+
+    public void addAccountOnGameServer(String account) {
+        accountsOnGameServer.add(account);
+    }
+
+    public void removeAccountOnGameServer(String account) {
+        accountsOnGameServer.remove(account);
+    }
+
+    public void setLastEcho(long lastEcho, Timer watchDog) {
+        if(this.watchDog != null) {
+            watchDog.stop();
+        }
+
+        this.lastEcho = lastEcho;
+        this.watchDog = watchDog;
     }
 }

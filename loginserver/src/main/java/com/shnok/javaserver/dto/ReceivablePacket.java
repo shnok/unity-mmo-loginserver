@@ -1,4 +1,4 @@
-package com.shnok.javaserver.dto.external;
+package com.shnok.javaserver.dto;
 
 import com.shnok.javaserver.dto.Packet;
 import org.apache.commons.lang3.ArrayUtils;
@@ -10,10 +10,10 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-public abstract class ServerPacket extends Packet {
+public abstract class ReceivablePacket extends Packet {
     private final List<Byte> buffer = new ArrayList<>();
 
-    public ServerPacket(byte type) {
+    public ReceivablePacket(byte type) {
         super(type);
     }
 

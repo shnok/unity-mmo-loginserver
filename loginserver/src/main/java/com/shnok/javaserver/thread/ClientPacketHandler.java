@@ -21,11 +21,11 @@ import static com.shnok.javaserver.config.Configuration.server;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 @Log4j2
-public class ClientPacketHandlerThread extends Thread {
+public class ClientPacketHandler extends Thread {
     private final LoginClientThread client;
     private final byte[] data;
 
-    public ClientPacketHandlerThread(LoginClientThread client, byte[] data) {
+    public ClientPacketHandler(LoginClientThread client, byte[] data) {
         this.client = client;
         this.data = data;
     }
@@ -121,7 +121,7 @@ public class ClientPacketHandlerThread extends Thread {
                 if (server.showLicense()) {
                     client.sendPacket(new LoginOkPacket(client.getSessionKey()));
                 } else {
-                    client.sendPacket(new ServerListPacket());
+                    client.sendPacket(new ReceivableListPacket());
                 }
 
                 break;

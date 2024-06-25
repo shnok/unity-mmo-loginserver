@@ -1,14 +1,14 @@
-package com.shnok.javaserver.dto.external;
+package com.shnok.javaserver.dto;
 
 import com.shnok.javaserver.dto.Packet;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 
-public abstract class ClientPacket extends Packet {
+public abstract class SendablePacket extends Packet {
     private int iterator;
 
-    public ClientPacket(byte[] data) {
+    public SendablePacket(byte[] data) {
         super(data);
         readB();
         readB();
