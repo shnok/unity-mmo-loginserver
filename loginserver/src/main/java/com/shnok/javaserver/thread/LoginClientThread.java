@@ -1,10 +1,10 @@
 package com.shnok.javaserver.thread;
 
-import com.shnok.javaserver.dto.ReceivablePacket;
+import com.shnok.javaserver.dto.SendablePacket;
 import com.shnok.javaserver.enums.AccountKickedReason;
 import com.shnok.javaserver.enums.LoginClientState;
 import com.shnok.javaserver.enums.LoginFailReason;
-import com.shnok.javaserver.enums.ServerPacketType;
+import com.shnok.javaserver.enums.packettypes.ServerPacketType;
 import com.shnok.javaserver.model.SessionKey;
 import com.shnok.javaserver.security.LoginCrypt;
 import com.shnok.javaserver.security.ScrambledKeyPair;
@@ -119,7 +119,7 @@ public class LoginClientThread extends Thread {
         }
     }
 
-    public boolean sendPacket(ReceivablePacket packet) {
+    public boolean sendPacket(SendablePacket packet) {
             ServerPacketType packetType = ServerPacketType.fromByte(packet.getType());
             if(packetType != ServerPacketType.Ping) {
                 log.debug("Sent packet: {}", packetType);

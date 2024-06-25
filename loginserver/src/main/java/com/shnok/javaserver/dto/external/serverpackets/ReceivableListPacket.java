@@ -1,13 +1,13 @@
 package com.shnok.javaserver.dto.external.serverpackets;
 
-import com.shnok.javaserver.dto.ReceivablePacket;
-import com.shnok.javaserver.enums.ServerPacketType;
+import com.shnok.javaserver.dto.SendablePacket;
+import com.shnok.javaserver.enums.packettypes.ServerPacketType;
 
-public class ReceivableListPacket extends ReceivablePacket {
+public class ReceivableListPacket extends SendablePacket {
     public ReceivableListPacket() {
         super(ServerPacketType.ServerList.getValue());
         writeB((byte)(0));
-        // TODO: return gameserver list
+        // TODO: send gameserver list
         buildPacket();
     }
 }

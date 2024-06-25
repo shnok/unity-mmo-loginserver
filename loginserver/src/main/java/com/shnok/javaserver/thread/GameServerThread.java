@@ -1,8 +1,12 @@
 package com.shnok.javaserver.thread;
 
 import com.shnok.javaserver.dto.Packet;
+import com.shnok.javaserver.dto.SendablePacket;
+import com.shnok.javaserver.dto.internal.loginserverpackets.InitLSPacket;
 import com.shnok.javaserver.dto.internal.loginserverpackets.LoginServerFailPacket;
 import com.shnok.javaserver.enums.GameServerState;
+import com.shnok.javaserver.enums.packettypes.LoginServerPacketType;
+import com.shnok.javaserver.enums.packettypes.ServerPacketType;
 import com.shnok.javaserver.model.GameServerInfo;
 import com.shnok.javaserver.security.NewCrypt;
 import com.shnok.javaserver.service.GameServerListenerService;
@@ -67,6 +71,8 @@ public class GameServerThread extends Thread {
         int packetLength;
 
         try {
+            sendPacket(new InitLSPacket(publicKey.getEncoded()));
+
             for (; ; ) {
                 packetType = in.read();
                 packetLength = in.read();
@@ -103,8 +109,26 @@ public class GameServerThread extends Thread {
     }
 
 
-    public void sendPacket(Packet packet) {
-        //TODO: send packet to game server
+    public boolean sendPacket(SendablePacket packet) {
+        LoginServerPacketType packetType = LoginServerPacketType.fromByte(packet.getType());
+        if(packetType != LoginServerPacketType.Ping) {
+            log.debug("Sent packet: {}", packetType);
+        }
+
+        try {
+            synchronized (out) {
+                for (byte b : packet.getData()) {
+                    out.write(b & 0xFF);
+                }
+                out.flush();
+            }
+
+            return true;
+        } catch (IOException e) {
+            log.warn("Trying to send packet to a gameserver connection.");
+        }
+
+        return false;
     }
 
     public void disconnect() {

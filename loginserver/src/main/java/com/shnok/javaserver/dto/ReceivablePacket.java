@@ -1,88 +1,41 @@
 package com.shnok.javaserver.dto;
 
-import com.shnok.javaserver.dto.Packet;
-import org.apache.commons.lang3.ArrayUtils;
-
+import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 public abstract class ReceivablePacket extends Packet {
-    private final List<Byte> buffer = new ArrayList<>();
+    private int iterator;
 
-    public ReceivablePacket(byte type) {
-        super(type);
+    public ReceivablePacket(byte[] data) {
+        super(data);
+        readB();
+        readB();
     }
 
-    protected void writeS(String s) {
-        try {
-            if (s != null) {
-                byte[] d = s.getBytes(StandardCharsets.UTF_8);
-                write(d);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+    protected byte readB() {
+        return packetData[iterator++];
     }
 
-    protected void writeB(byte b) {
-        buffer.add(b);
+    protected int readI() {
+        byte[] array = new byte[4];
+        System.arraycopy(packetData, iterator, array, 0, 4);
+        iterator += 4;
+        return ByteBuffer.wrap(array).getInt();
     }
 
-    protected void writeB(byte[] b) {
-        for (byte bb : b) {
-            buffer.add(bb);
-        }
+    protected float readF() {
+        byte[] array = new byte[4];
+        System.arraycopy(packetData, iterator, array, 0, 4);
+        iterator += 4;
+        return ByteBuffer.wrap(array).getFloat();
     }
 
-    protected void writeI(int i) {
-        Byte[] array = new Byte[]{(byte) ((i >> 24) & 0xff),
-                (byte) ((i >> 16) & 0xff),
-                (byte) ((i >> 8) & 0xff),
-                (byte) ((i) & 0xff)};
+    protected String readS() {
+        byte strLen = readB();
+        byte[] data = new byte[strLen];
+        System.arraycopy(packetData, iterator, data, 0, strLen);
+        iterator += strLen;
 
-        buffer.addAll(Arrays.asList(array));
-    }
-
-    protected void writeL(long l) {
-        Byte[] array = new Byte[]{(byte) ((l >> 56) & 0xff),
-                (byte) ((l >> 48) & 0xff),
-                (byte) ((l >> 40) & 0xff),
-                (byte) ((l >> 32) & 0xff),
-                (byte) ((l >> 24) & 0xff),
-                (byte) ((l >> 16) & 0xff),
-                (byte) ((l >> 8) & 0xff),
-                (byte) (l & 0xff)};
-
-        buffer.addAll(Arrays.asList(array));
-    }
-
-    protected void writeF(float f) {
-        int intBits = Float.floatToIntBits(f);
-        Byte[] array = new Byte[]{
-                (byte) (intBits >> 24), (byte) (intBits >> 16), (byte) (intBits >> 8), (byte) (intBits)};
-
-        buffer.addAll(Arrays.asList(array));
-    }
-
-    protected void write(byte[] data) {
-
-        buffer.add((byte) data.length);
-        List<Byte> byteList = IntStream.range(0, data.length)
-                .mapToObj((int j) -> data[j])
-                .collect(Collectors.toList());
-        buffer.addAll(byteList);
-    }
-
-    protected void buildPacket() {
-        buffer.add(0, packetType);
-        buffer.add(1, (byte) (buffer.size() + 1));
-        Byte[] array = buffer.toArray(new Byte[0]);
-        setData(ArrayUtils.toPrimitive(array));
-
-        //System.out.println("Sent: " + Arrays.toString(_packetData));
+        return new String(data, 0, strLen, StandardCharsets.UTF_8);
     }
 }

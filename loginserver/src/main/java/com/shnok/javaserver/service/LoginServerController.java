@@ -1,6 +1,6 @@
 package com.shnok.javaserver.service;
 
-import com.shnok.javaserver.dto.ReceivablePacket;
+import com.shnok.javaserver.dto.SendablePacket;
 import com.shnok.javaserver.model.SessionKey;
 import com.shnok.javaserver.security.Rnd;
 import com.shnok.javaserver.security.ScrambledKeyPair;
@@ -107,7 +107,7 @@ public class LoginServerController {
     }
 
     // Broadcast to everyone ignoring caller
-    public void broadcast(ReceivablePacket packet, LoginClientThread current) {
+    public void broadcast(SendablePacket packet, LoginClientThread current) {
         synchronized (clients) {
             for (LoginClientThread c : clients) {
                 if (c.authenticated && c != current) {
@@ -118,7 +118,7 @@ public class LoginServerController {
     }
 
    // Broadcast to everyone
-   public void broadcast(ReceivablePacket packet) {
+   public void broadcast(SendablePacket packet) {
         synchronized (clients) {
             for (LoginClientThread c : clients) {
                 if (c.authenticated) {

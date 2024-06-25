@@ -1,7 +1,7 @@
 package com.shnok.javaserver.thread;
 
 import com.shnok.javaserver.dto.external.serverpackets.PingPacket;
-import com.shnok.javaserver.enums.ClientPacketType;
+import com.shnok.javaserver.enums.packettypes.ClientPacketType;
 import lombok.extern.log4j.Log4j2;
 
 import javax.swing.*;

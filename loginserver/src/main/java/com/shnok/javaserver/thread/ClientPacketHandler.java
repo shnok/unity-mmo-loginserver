@@ -4,6 +4,7 @@ import com.shnok.javaserver.db.entity.DBAccountInfo;
 import com.shnok.javaserver.dto.external.clientpackets.AuthRequestPacket;
 import com.shnok.javaserver.dto.external.serverpackets.*;
 import com.shnok.javaserver.enums.*;
+import com.shnok.javaserver.enums.packettypes.ClientPacketType;
 import com.shnok.javaserver.service.LoginServerController;
 import com.shnok.javaserver.service.db.AccountInfoTable;
 import lombok.extern.log4j.Log4j2;
