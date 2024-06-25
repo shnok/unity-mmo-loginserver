@@ -7,7 +7,9 @@ public class InitPacket extends SendablePacket {
     public InitPacket(byte[] publicKey, byte[] blowfishKey, int sessionId) {
         super(ServerPacketType.Init.getValue());
         writeI(sessionId);
+        writeI(publicKey.length);
         writeB(publicKey);
+        writeI(blowfishKey.length);
         writeB(blowfishKey);
 
         buildPacket();

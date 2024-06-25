@@ -93,7 +93,7 @@ public class LoginClientThread extends Thread {
                 handlePacket(data);
             }
         } catch (Exception e) {
-            log.error("Exception while reading packets.");
+            log.error("Exception while reading client packets.");
         } finally {
             log.info("User {} disconnected", connectionIp);
             disconnect();
@@ -127,6 +127,8 @@ public class LoginClientThread extends Thread {
 
         try {
             synchronized (out) {
+                out.write(packet.getLength() & 0xff);
+                out.write((packet.getLength() >> 8) & 0xff);
                 for (byte b : packet.getData()) {
                     out.write(b & 0xFF);
                 }

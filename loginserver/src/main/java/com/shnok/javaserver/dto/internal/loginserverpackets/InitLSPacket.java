@@ -5,7 +5,7 @@ import com.shnok.javaserver.enums.packettypes.LoginServerPacketType;
 
 public class InitLSPacket extends SendablePacket {
     public InitLSPacket(byte[] publicKey) {
-        super(LoginServerPacketType.Init.getValue());
+        super(LoginServerPacketType.InitLS.getValue());
         writeB(publicKey);
         buildPacket();
     }

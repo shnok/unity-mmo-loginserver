@@ -1,5 +1,6 @@
 package com.shnok.javaserver;
 
+import com.shnok.javaserver.service.GameServerController;
 import com.shnok.javaserver.service.GameServerListenerService;
 import com.shnok.javaserver.service.LoginServerListenerService;
 import com.shnok.javaserver.service.ServerShutdownService;
@@ -20,6 +21,7 @@ public class Main {
         LoginServerListenerService.getInstance().initialize();
         LoginServerListenerService.getInstance().start();
 
+        GameServerController.getInstance();
         GameServerListenerService.getInstance().initialize();
         GameServerListenerService.getInstance().start();
         try {

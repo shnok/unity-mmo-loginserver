@@ -82,6 +82,8 @@ public abstract class SendablePacket extends Packet {
         Byte[] array = buffer.toArray(new Byte[0]);
         setData(ArrayUtils.toPrimitive(array));
 
+
+
         //System.out.println("Sent: " + Arrays.toString(_packetData));
     }
 }

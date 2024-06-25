@@ -5,7 +5,7 @@ import java.util.Map;
 
 public enum LoginServerPacketType {
     Ping((byte)0),
-    Init((byte)1),
+    InitLS((byte)1),
     Fail((byte)2);
 
     private final byte value;

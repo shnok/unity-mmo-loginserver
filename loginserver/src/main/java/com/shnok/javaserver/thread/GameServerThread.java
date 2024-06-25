@@ -9,6 +9,7 @@ import com.shnok.javaserver.enums.packettypes.LoginServerPacketType;
 import com.shnok.javaserver.enums.packettypes.ServerPacketType;
 import com.shnok.javaserver.model.GameServerInfo;
 import com.shnok.javaserver.security.NewCrypt;
+import com.shnok.javaserver.service.GameServerController;
 import com.shnok.javaserver.service.GameServerListenerService;
 import lombok.Getter;
 import lombok.Setter;
@@ -20,8 +21,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.security.KeyPair;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
+import java.util.Arrays;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -59,6 +62,12 @@ public class GameServerThread extends Thread {
         } catch (IOException e) {
             e.printStackTrace();
         }
+
+        KeyPair pair = GameServerController.getInstance().getKeyPair();
+        privateKey = (RSAPrivateKey) pair.getPrivate();
+        publicKey = (RSAPublicKey) pair.getPublic();
+        blowfish = new NewCrypt("_;v.]05-31!|+-%xT!^[$\00");
+        setName(getClass().getSimpleName() + "-" + Thread.currentThread().getId() + "@" + connectionIp);
     }
 
     @Override
@@ -67,37 +76,37 @@ public class GameServerThread extends Thread {
     }
 
     private void startReadingPackets() {
-        int packetType;
-        int packetLength;
+        int lengthHi;
+        int lengthLo;
+        int length;
 
         try {
             sendPacket(new InitLSPacket(publicKey.getEncoded()));
 
             for (; ; ) {
-                packetType = in.read();
-                packetLength = in.read();
+                lengthLo = in.read();
+                lengthHi = in.read();
+                length = (lengthHi * 256) + lengthLo;
 
-                if (packetType == -1 || connection.isClosed()) {
-                    log.warn("Connection was closed.");
+                if ((lengthHi < 0) || connection.isClosed()) {
+                    log.warn("Gameserver terminated the connection!");
                     break;
                 }
 
-                byte[] data = new byte[packetLength];
-                data[0] = (byte) packetType;
-                data[1] = (byte) packetLength;
+                byte[] data = new byte[length];
 
                 int receivedBytes = 0;
                 int newBytes = 0;
-
-                while ((newBytes != -1) && (receivedBytes < (packetLength - 2))) {
-                    newBytes = in.read(data, 2, packetLength - 2);
+                while ((newBytes != -1) && (receivedBytes < (length))) {
+                    newBytes = in.read(data, 0, length);
                     receivedBytes = receivedBytes + newBytes;
                 }
 
                 handlePacket(data);
             }
         } catch (Exception e) {
-            log.error("Exception while reading packets.");
+            log.error("Exception while reading gameserver packets.");
+            e.printStackTrace();
         } finally {
             log.info("Gameserver {} connection closed.", connectionIp);
             disconnect();
@@ -115,8 +124,14 @@ public class GameServerThread extends Thread {
             log.debug("Sent packet: {}", packetType);
         }
 
+        log.debug(Arrays.toString(packet.getData()));
+        blowfish.crypt(packet.getData(), 0, packet.getData().length);
+        log.debug(Arrays.toString(packet.getData()));
+
         try {
             synchronized (out) {
+                out.write(packet.getLength() & 0xff);
+                out.write((packet.getLength() >> 8) & 0xff);
                 for (byte b : packet.getData()) {
                     out.write(b & 0xFF);
                 }
