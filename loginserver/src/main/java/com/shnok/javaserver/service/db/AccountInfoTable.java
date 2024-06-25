@@ -3,17 +3,17 @@ package com.shnok.javaserver.service.db;
 import com.shnok.javaserver.db.entity.DBAccountInfo;
 import com.shnok.javaserver.db.repository.AccountInfoRepository;
 
-public class AccountInfoTableService {
+public class AccountInfoTable {
     private final AccountInfoRepository accountInfoRepository;
-    private static AccountInfoTableService instance;
-    public static AccountInfoTableService getInstance() {
+    private static AccountInfoTable instance;
+    public static AccountInfoTable getInstance() {
         if (instance == null) {
-            instance = new AccountInfoTableService();
+            instance = new AccountInfoTable();
         }
         return instance;
     }
 
-    public AccountInfoTableService() {
+    public AccountInfoTable() {
         accountInfoRepository = new AccountInfoRepository();
     }
 

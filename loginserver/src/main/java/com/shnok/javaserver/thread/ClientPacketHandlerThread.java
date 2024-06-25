@@ -5,7 +5,7 @@ import com.shnok.javaserver.dto.external.clientpackets.AuthRequestPacket;
 import com.shnok.javaserver.dto.external.serverpackets.*;
 import com.shnok.javaserver.enums.*;
 import com.shnok.javaserver.service.LoginServerController;
-import com.shnok.javaserver.service.db.AccountInfoTableService;
+import com.shnok.javaserver.service.db.AccountInfoTable;
 import lombok.extern.log4j.Log4j2;
 
 import javax.swing.*;
@@ -15,9 +15,7 @@ import java.net.InetAddress;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.interfaces.RSAPrivateKey;
-import java.util.ArrayList;
 import java.util.Base64;
-import java.util.List;
 
 import static com.shnok.javaserver.config.Configuration.server;
 import static java.nio.charset.StandardCharsets.UTF_8;
@@ -84,7 +82,7 @@ public class ClientPacketHandlerThread extends Thread {
             final MessageDigest md = MessageDigest.getInstance("SHA");
             final byte[] raw = password.getBytes(UTF_8);
             final String hashBase64 = Base64.getEncoder().encodeToString(md.digest(raw));
-            accountInfo = AccountInfoTableService.getInstance().getAccountInfo(username);
+            accountInfo = AccountInfoTable.getInstance().getAccountInfo(username);
 
             if (accountInfo != null) {
                 if(!accountInfo.getPassHash().equals(hashBase64)) {
@@ -99,7 +97,7 @@ public class ClientPacketHandlerThread extends Thread {
                 accountInfo.setPassHash(hashBase64);
                 accountInfo.setLastActive(System.currentTimeMillis());
                 accountInfo.setLastIp(client.getConnectionIp());
-                AccountInfoTableService.getInstance().createAccount(accountInfo);
+                AccountInfoTable.getInstance().createAccount(accountInfo);
                 log.info("Autocreated account {}.", username);
             } else {
                 // TODO: CLOSE CLIENT WITH LoginFailReason.REASON_USER_OR_PASS_WRONG
@@ -208,7 +206,7 @@ public class ClientPacketHandlerThread extends Thread {
             info.setLastIp(client.getConnectionIp());
             info.setLastActive(System.currentTimeMillis());
 
-            AccountInfoTableService.getInstance().updateAccount(info);
+            AccountInfoTable.getInstance().updateAccount(info);
 
             return true;
         } catch (Exception ex) {
