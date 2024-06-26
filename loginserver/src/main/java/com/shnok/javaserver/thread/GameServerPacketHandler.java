@@ -82,6 +82,13 @@ public class GameServerPacketHandler extends Thread {
         GameServerController gameServerController = GameServerController.getInstance();
 
         GameServerInfo gsi = gameServerController.getRegisteredGameServerById(packet.getId());
+
+        if(true) {
+            gameserver.forceClose(LoginServerFailReason.REASON_NO_FREE_ID.getCode());
+            return false;
+        }
+
+
         // is there a game server registered with this id?
         if (gsi != null) {
             log.debug("A gameserver is already registered with ID {}", packet.getId());

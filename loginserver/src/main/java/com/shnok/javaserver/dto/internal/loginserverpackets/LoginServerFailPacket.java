@@ -6,7 +6,9 @@ import com.shnok.javaserver.enums.packettypes.LoginServerPacketType;
 public class LoginServerFailPacket extends SendablePacket {
     public LoginServerFailPacket(int failReason) {
         super(LoginServerPacketType.Fail.getValue());
-        writeB((byte) failReason);
+        writeB((byte) 0);
+        writeB((byte) 0);
+        writeI(failReason);
         buildPacket();
     }
 }
