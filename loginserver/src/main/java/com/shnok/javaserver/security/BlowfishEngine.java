@@ -202,10 +202,6 @@ public final class BlowfishEngine {
     }
 
     private int bytesTo32bits(byte[] src, int srcIndex) {
-        int test1 = (src[srcIndex + 3] & 255) << 24;
-        int test2 = (src[srcIndex + 2] & 255) << 16;
-        int test3 = (src[srcIndex + 1] & 255) << 8;
-        int test4 = src[srcIndex] & 255;
         return (src[srcIndex + 3] & 255) << 24 | (src[srcIndex + 2] & 255) << 16 | (src[srcIndex + 1] & 255) << 8 | src[srcIndex] & 255;
     }
 

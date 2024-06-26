@@ -11,6 +11,7 @@ import com.shnok.javaserver.model.GameServerInfo;
 import com.shnok.javaserver.security.NewCrypt;
 import com.shnok.javaserver.service.GameServerController;
 import com.shnok.javaserver.service.GameServerListenerService;
+import com.shnok.javaserver.service.ThreadPoolManagerService;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.log4j.Log4j2;
@@ -34,8 +35,6 @@ import java.util.concurrent.ConcurrentHashMap;
 public class GameServerThread extends Thread {
     private InputStream in;
     private OutputStream out;
-    private long lastEcho;
-    private Timer watchDog;
     private Socket connection;
     private RSAPublicKey publicKey;
     private RSAPrivateKey privateKey;
@@ -81,7 +80,7 @@ public class GameServerThread extends Thread {
         int length;
 
         try {
-            sendPacket(new InitLSPacket(publicKey.getEncoded()));
+            sendPacket(new InitLSPacket(publicKey.getModulus().toByteArray()));
 
             for (; ; ) {
                 lengthLo = in.read();
@@ -114,19 +113,17 @@ public class GameServerThread extends Thread {
     }
 
     private void handlePacket(byte[] data) {
-        // TODO: Handle gameserver packet
+        ThreadPoolManagerService.getInstance().handlePacket(new GameServerPacketHandler(this, data));
     }
 
 
     public boolean sendPacket(SendablePacket packet) {
         LoginServerPacketType packetType = LoginServerPacketType.fromByte(packet.getType());
-        if(packetType != LoginServerPacketType.Ping) {
-            log.debug("Sent packet: {}", packetType);
-        }
+        log.debug("Sent packet: {}", packetType);
 
-        log.debug(Arrays.toString(packet.getData()));
+        log.debug("---> Clear packet {} : {}", packet.getData().length, Arrays.toString(packet.getData()));
         blowfish.crypt(packet.getData(), 0, packet.getData().length);
-        log.debug(Arrays.toString(packet.getData()));
+        log.debug("---> Encrypted packet {} : {}", packet.getData().length, Arrays.toString(packet.getData()));
 
         try {
             synchronized (out) {
@@ -156,6 +153,8 @@ public class GameServerThread extends Thread {
     }
 
     public void attachGameServerInfo(GameServerInfo gsi, int port, String[] hosts, int maxPlayers) {
+        log.debug("Attaching gameserver with ID: {}.", gsi.getId());
+
         setGameServerInfo(gsi);
         gsi.setGameServerThread(this);
         gsi.setPort(port);
@@ -211,12 +210,13 @@ public class GameServerThread extends Thread {
         accountsOnGameServer.remove(account);
     }
 
-    public void setLastEcho(long lastEcho, Timer watchDog) {
-        if(this.watchDog != null) {
-            watchDog.stop();
-        }
+    public void setBlowfish(NewCrypt newCrypt) {
+        log.info("New BlowFish key received, Blowfish Engine initialized.");
+        blowfish = newCrypt;
+    }
 
-        this.lastEcho = lastEcho;
-        this.watchDog = watchDog;
+    public void setLoginConnectionState(GameServerState state) {
+        log.info("New gameserver connection state: {}", state);
+        loginConnectionState = state;
     }
 }

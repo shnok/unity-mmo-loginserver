@@ -1,9 +1,6 @@
 package com.shnok.javaserver;
 
-import com.shnok.javaserver.service.GameServerController;
-import com.shnok.javaserver.service.GameServerListenerService;
-import com.shnok.javaserver.service.LoginServerListenerService;
-import com.shnok.javaserver.service.ServerShutdownService;
+import com.shnok.javaserver.service.*;
 import lombok.extern.log4j.Log4j2;
 
 @Log4j2
@@ -15,7 +12,7 @@ public class Main {
     public static void runServer(String... args)  {
         log.info("Starting application.");
 
-        //ThreadPoolManagerService.getInstance().initialize();
+        ThreadPoolManagerService.getInstance().initialize();
         Runtime.getRuntime().addShutdownHook(ServerShutdownService.getInstance());
 
         LoginServerListenerService.getInstance().initialize();
