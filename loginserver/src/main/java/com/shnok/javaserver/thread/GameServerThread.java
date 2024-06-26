@@ -12,6 +12,7 @@ import com.shnok.javaserver.security.NewCrypt;
 import com.shnok.javaserver.service.GameServerController;
 import com.shnok.javaserver.service.GameServerListenerService;
 import com.shnok.javaserver.service.ThreadPoolManagerService;
+import com.shnok.javaserver.util.ServerNameDAO;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.log4j.Log4j2;
@@ -104,8 +105,6 @@ public class GameServerThread extends Thread {
                 handlePacket(data);
             }
         } catch (Exception e) {
-            log.error("Exception while reading gameserver packets.");
-            e.printStackTrace();
         } finally {
             log.info("Gameserver {} connection closed.", connectionIp);
             disconnect();
@@ -115,7 +114,6 @@ public class GameServerThread extends Thread {
     private void handlePacket(byte[] data) {
         ThreadPoolManagerService.getInstance().handlePacket(new GameServerPacketHandler(this, data));
     }
-
 
     public boolean sendPacket(SendablePacket packet) {
         LoginServerPacketType packetType = LoginServerPacketType.fromByte(packet.getType());
@@ -145,7 +143,15 @@ public class GameServerThread extends Thread {
 
     public void disconnect() {
         try {
+            if (gameServerInfo.isAuthed()) {
+                gameServerInfo.setDown();
+
+                log.info("Server {}[{}] is now disconnected.", ServerNameDAO.getServer(gameServerInfo.getId()),
+                        gameServerInfo.getId());
+            }
+
             GameServerListenerService.getInstance().removeGameServer(this);
+
             connection.close();
         } catch (IOException e) {
             log.error("Error while closing connection.", e);
@@ -183,11 +189,7 @@ public class GameServerThread extends Thread {
     public void forceClose(int reason) {
         sendPacket(new LoginServerFailPacket(reason));
 
-        try {
-            connection.close();
-        } catch (IOException ex) {
-            log.debug("Failed disconnecting banned server, server already disconnected.");
-        }
+        disconnect();
     }
 
     public static boolean isBannedGameServerIP(String ipAddress) {

@@ -2,6 +2,7 @@ package com.shnok.javaserver.model;
 
 import com.shnok.javaserver.enums.ServerStatus;
 import com.shnok.javaserver.thread.GameServerThread;
+import com.shnok.javaserver.util.ServerNameDAO;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -52,9 +53,7 @@ public class GameServerInfo {
     }
 
     public String getName() {
-        // TODO: Custom name
-        return "Teon";
-        //return ServerNameDAO.getServer(id);
+        return ServerNameDAO.getServer(id);
     }
 
     public String getStatusName() {

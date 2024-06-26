@@ -3,6 +3,8 @@ package com.shnok.javaserver.thread;
 import com.shnok.javaserver.dto.external.serverpackets.PingPacket;
 import com.shnok.javaserver.dto.internal.gameserverpackets.BlowFishKeyPacket;
 import com.shnok.javaserver.dto.internal.gameserverpackets.GameServerAuthPacket;
+import com.shnok.javaserver.dto.internal.loginserverpackets.AuthResponsePacket;
+import com.shnok.javaserver.enums.GameServerState;
 import com.shnok.javaserver.enums.LoginServerFailReason;
 import com.shnok.javaserver.enums.packettypes.ClientPacketType;
 import com.shnok.javaserver.enums.packettypes.GameServerPacketType;
@@ -46,12 +48,27 @@ public class GameServerPacketHandler extends Thread {
 
         log.debug("Received packet: {}", type);
 
-        switch (type) {
-            case BlowFishKey:
-                onReceiveBlowfishKey(data);
+        GameServerState state = gameserver.getLoginConnectionState();
+        switch (state) {
+            case CONNECTED:
+                if(type == GameServerPacketType.BlowFishKey) {
+                    onReceiveBlowfishKey(data);
+                } else {
+                    log.warn("Unknown Opcode {} in state {} from game server, closing connection!",
+                            type, state);
+                    gameserver.forceClose(LoginServerFailReason.NOT_AUTHED.getCode());
+                }
                 break;
-            case AuthRequest:
-                onReceiveAuthRequest(data);
+            case BF_CONNECTED:
+                if(type == GameServerPacketType.AuthRequest) {
+                    onReceiveAuthRequest(data);
+                } else {
+                    log.warn("Unknown Opcode {} in state {} from game server, closing connection!",
+                            type, state);
+                    gameserver.forceClose(LoginServerFailReason.NOT_AUTHED.getCode());
+                }
+                break;
+            case AUTHED:
                 break;
         }
     }
@@ -70,11 +87,10 @@ public class GameServerPacketHandler extends Thread {
         log.info("Auth request received.");
 
         if (handleRegProcess(packet)) {
-//            server.sendPacket(new AuthResponse(server.getGameServerInfo().getId()));
-//            LOG.info("Game Server {} enabled.", GameServerVersion.valueOf(_serverVersion));
-//
-//            server.broadcastToTelnet("GameServer [" + server.getServerId() + "] " + ServerNameDAO.getServer(server.getServerId()) + " is connected");
-//            server.setLoginConnectionState(GameServerState.AUTHED);
+            gameserver.sendPacket(new AuthResponsePacket(gameserver.getGameServerInfo().getId()));
+            gameserver.setLoginConnectionState(GameServerState.AUTHED);
+
+            log.info("Game Server {} enabled.", gameserver.getGameServerInfo().getId());
         }
     }
 
@@ -82,12 +98,6 @@ public class GameServerPacketHandler extends Thread {
         GameServerController gameServerController = GameServerController.getInstance();
 
         GameServerInfo gsi = gameServerController.getRegisteredGameServerById(packet.getId());
-
-        if(true) {
-            gameserver.forceClose(LoginServerFailReason.REASON_NO_FREE_ID.getCode());
-            return false;
-        }
-
 
         // is there a game server registered with this id?
         if (gsi != null) {
@@ -106,6 +116,8 @@ public class GameServerPacketHandler extends Thread {
                 }
             } else {
                 log.debug("There is already a server registered with the desired id and different hex id.");
+                log.debug("Old hexid: {}", gsi.getHexId());
+                log.debug("New hexid: {}", packet.getHexId());
                 // there is already a server registered with the desired id and different hex id
                 // try to register this one with an alternative id
                 if (server.acceptNewGameserver() && packet.isAcceptAlternate()) {
