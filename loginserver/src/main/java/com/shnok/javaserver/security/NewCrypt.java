@@ -74,6 +74,7 @@ public final class NewCrypt {
     }
 
     public static void encXORPass(byte[] raw, int offset, int size, int key) {
+        System.out.println("XOR KEY: " + key);
         int stop = size - 8;
         int pos = 4 + offset;
 

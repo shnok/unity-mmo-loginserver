@@ -1,6 +1,7 @@
 package com.shnok.javaserver.security;
 
 import java.io.IOException;
+import java.util.Arrays;
 
 public class LoginCrypt {
     private static final byte[] STATIC_BLOWFISH_KEY = {
@@ -64,30 +65,24 @@ public class LoginCrypt {
      * @throws IOException packet is too long to make padding and add verification data
      */
     public int encrypt(byte[] raw, final int offset, int size) throws IOException {
-        // reserve checksum
-        size += 4;
-
         if (_static) {
-            // reserve for XOR "key"
-            size += 4;
 
-            // padding
-            size += 8 - (size % 8);
-            if ((offset + size) > raw.length) {
-                throw new IOException("packet too long");
-            }
+            System.out.println("RAW: " + Arrays.toString(raw));
             NewCrypt.encXORPass(raw, offset, size, Rnd.nextInt());
+            System.out.println("XOR: " + Arrays.toString(raw));
             _STATIC_CRYPT.crypt(raw, offset, size);
+            System.out.println("CRYPT: " + Arrays.toString(raw));
+
+            byte[] decrypted = Arrays.copyOf(raw, raw.length);
+            _STATIC_CRYPT.decrypt(decrypted, offset, size);
+            System.out.println("DECRYPTED: " + Arrays.toString(decrypted));
+
             _static = false;
         } else {
-            // padding
-            size += 8 - (size % 8);
-            if ((offset + size) > raw.length) {
-                throw new IOException("packet too long");
-            }
             NewCrypt.appendChecksum(raw, offset, size);
             _crypt.crypt(raw, offset, size);
         }
+
         return size;
     }
 }

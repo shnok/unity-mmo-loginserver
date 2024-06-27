@@ -6,8 +6,9 @@ import com.shnok.javaserver.enums.LoginFailReason;
 
 public class LoginFailPacket extends SendablePacket {
     public LoginFailPacket(LoginFailReason loginFailReason) {
-        super(ServerPacketType.AuthResponse.getValue());
+        super(ServerPacketType.LoginFail.getValue());
         writeB((byte) loginFailReason.getCode());
-        buildPacket();
+
+        buildPacket(true);
     }
 }

@@ -125,8 +125,9 @@ public class GameServerThread extends Thread {
 
         try {
             synchronized (out) {
-                out.write(packet.getLength() & 0xff);
-                out.write((packet.getLength() >> 8) & 0xff);
+                out.write((byte)(packet.getData().length) & 0xff);
+                out.write((byte)((packet.getData().length) >> 8) & 0xff);
+
                 for (byte b : packet.getData()) {
                     out.write(b & 0xFF);
                 }

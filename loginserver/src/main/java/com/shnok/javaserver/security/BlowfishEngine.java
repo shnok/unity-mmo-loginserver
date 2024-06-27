@@ -211,4 +211,16 @@ public final class BlowfishEngine {
         dst[dstIndex + 2] = (byte)(in >> 16);
         dst[dstIndex + 3] = (byte)(in >> 24);
     }
+
+    // INVERTED FOR C#
+//    private int bytesTo32bits(byte[] b, int i) {
+//        return ((b[i] & 0xff) << 24) | ((b[i + 1] & 0xff) << 16) | ((b[i + 2] & 0xff) << 8) | (b[i + 3] & 0xff);
+//    }
+//
+//    private void bits32ToBytes(int in, byte[] b, int offset) {
+//        b[offset + 3] = (byte) (in);
+//        b[offset + 2] = (byte) (in >> 8);
+//        b[offset + 1] = (byte) (in >> 16);
+//        b[offset] = (byte) (in >> 24);
+//    }
 }

@@ -6,11 +6,10 @@ import java.util.Map;
 public enum ServerPacketType {
     Ping((byte)0),
     Init((byte)1),
-    AuthResponse((byte)2),
-    LoginFailResponse((byte)3),
-    AccountKicked((byte) 4),
-    ServerList((byte) 5),
-    LoginOk((byte) 6);
+    LoginOk((byte)2),
+    LoginFail((byte)3),
+    ReceivableList((byte) 4),
+    AccountKicked((byte) 5);
 
     private final byte value;
 
