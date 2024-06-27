@@ -137,8 +137,7 @@ public class GameServerPacketHandler extends Thread {
                     gsi = new GameServerInfo(packet.getId(), packet.getHexId(), gameserver);
                     if (gameServerController.registerWithFirstAvailableId(gsi)) {
                         gameserver.attachGameServerInfo(gsi, packet.getPort(), packet.getHosts(), packet.getMaxPlayer());
-                        //TODO: Register in DB
-                        //gameServerTable.registerServerOnDB(gsi);
+                        GameServerController.getInstance().registerServerOnDB(gsi);
                     } else {
                         log.debug("No free gameserver id remaining.");
                         gameserver.forceClose(LoginServerFailReason.REASON_NO_FREE_ID.getCode());
@@ -158,8 +157,7 @@ public class GameServerPacketHandler extends Thread {
                 gsi = new GameServerInfo(packet.getId(), packet.getHexId(), gameserver);
                 if (gameServerController.register(packet.getId(), gsi)) {
                     gameserver.attachGameServerInfo(gsi, packet.getPort(), packet.getHosts(), packet.getMaxPlayer());
-                    //TODO: Register in DB
-                    //gameServerTable.registerServerOnDB(gsi);
+                    GameServerController.getInstance().registerServerOnDB(gsi);
                 } else {
                     log.error("ID {} is not available anymore.", packet.getId());
                     // someone took this ID meanwhile

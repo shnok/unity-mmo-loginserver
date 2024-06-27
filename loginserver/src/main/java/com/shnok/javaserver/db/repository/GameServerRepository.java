@@ -25,7 +25,7 @@ public class GameServerRepository implements GameServerDao {
     public void addGameServer(DBGameServer gameServer) {
         try (Session session = DbFactory.getSessionFactory().openSession()) {
             session.beginTransaction();
-            session.save(gameServer);
+            session.saveOrUpdate(gameServer);
             session.getTransaction().commit();
         } catch (Exception e) {
             log.error("SQL ERROR: {}", e.getMessage(), e);

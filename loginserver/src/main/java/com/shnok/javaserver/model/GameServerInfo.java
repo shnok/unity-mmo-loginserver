@@ -60,7 +60,8 @@ public class GameServerInfo {
 
     public void setStatus(int value) {
         status = value;
-        log.info("Server {} status changed to {}.", getId(), getStatusName());
+        log.info("Server {}[{}] status changed to {}.", ServerNameDAO.getServer(getId()),
+                getId(), getStatusName());
     }
 
     public String getStatusName() {

@@ -4,18 +4,14 @@ import com.shnok.javaserver.db.entity.DBGameServer;
 import com.shnok.javaserver.model.GameServerInfo;
 import com.shnok.javaserver.security.Rnd;
 import com.shnok.javaserver.service.db.GameServerTable;
-import com.shnok.javaserver.thread.GameServerThread;
-import com.shnok.javaserver.thread.LoginClientThread;
+import com.shnok.javaserver.util.HexUtils;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.log4j.Log4j2;
 
-import java.math.BigInteger;
-import java.net.Socket;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.spec.RSAKeyGenParameterSpec;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -61,8 +57,10 @@ public class GameServerController {
         List<DBGameServer> gameServerList = GameServerTable.getInstance().getAllGameServers();
         gameServerList.forEach(gameServer -> {
             GAME_SERVER_TABLE.put(gameServer.getServerId(), new GameServerInfo(gameServer.getServerId(),
-                    stringToHex(gameServer.getHexId())));
+                    HexUtils.stringToHex(gameServer.getHexId())));
         });
+
+        log.info("Loaded {} registered gameserver(s) from DB.", gameServerList.size());
     }
 
     /**
@@ -145,7 +143,7 @@ public class GameServerController {
         register(id, new GameServerInfo(id, hexId));
 
         DBGameServer gameServer = new DBGameServer();
-        gameServer.setHexId(hexToString(hexId));
+        gameServer.setHexId(HexUtils.hexToString(hexId));
         gameServer.setServerId(id);
         gameServer.setHost(externalHost);
 
@@ -158,26 +156,5 @@ public class GameServerController {
      */
     public KeyPair getKeyPair() {
         return keyPairs[Rnd.nextInt(10)];
-    }
-
-    /**
-     * String to hex.
-     * @param string the string to convert.
-     * @return return the hex representation.
-     */
-    private byte[] stringToHex(String string) {
-        return new BigInteger(string, 16).toByteArray();
-    }
-
-    /**
-     * Hex to string.
-     * @param hex the hex value to convert.
-     * @return the string representation.
-     */
-    private String hexToString(byte[] hex) {
-        if (hex == null) {
-            return "null";
-        }
-        return new BigInteger(hex).toString(16);
     }
 }

@@ -2,6 +2,8 @@ package com.shnok.javaserver.service.db;
 
 import com.shnok.javaserver.db.entity.DBGameServer;
 import com.shnok.javaserver.db.repository.GameServerRepository;
+import com.shnok.javaserver.model.GameServerInfo;
+import com.shnok.javaserver.util.HexUtils;
 
 import java.util.List;
 
