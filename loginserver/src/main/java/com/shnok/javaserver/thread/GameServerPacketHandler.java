@@ -3,6 +3,7 @@ package com.shnok.javaserver.thread;
 import com.shnok.javaserver.dto.external.serverpackets.PingPacket;
 import com.shnok.javaserver.dto.internal.gameserverpackets.BlowFishKeyPacket;
 import com.shnok.javaserver.dto.internal.gameserverpackets.GameServerAuthPacket;
+import com.shnok.javaserver.dto.internal.gameserverpackets.PlayerInGamePacket;
 import com.shnok.javaserver.dto.internal.gameserverpackets.ServerStatusPacket;
 import com.shnok.javaserver.dto.internal.loginserverpackets.AuthResponsePacket;
 import com.shnok.javaserver.enums.GameServerState;
@@ -14,6 +15,7 @@ import com.shnok.javaserver.model.GameServerInfo;
 import com.shnok.javaserver.security.NewCrypt;
 import com.shnok.javaserver.service.GameServerController;
 import com.shnok.javaserver.service.db.GameServerTable;
+import com.shnok.javaserver.util.ServerNameDAO;
 import lombok.extern.log4j.Log4j2;
 
 import javax.swing.*;
@@ -21,6 +23,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.security.interfaces.RSAPrivateKey;
 import java.util.Arrays;
+import java.util.List;
 
 import static com.shnok.javaserver.config.Configuration.server;
 import static com.shnok.javaserver.dto.internal.gameserverpackets.ServerStatusPacket.MAX_PLAYERS;
@@ -74,6 +77,9 @@ public class GameServerPacketHandler extends Thread {
             case AUTHED:
                 if(type == GameServerPacketType.ServerStatus) {
                     onReceiveServerStatus();
+                }
+                if(type == GameServerPacketType.PlayerInGame) {
+                    onReceivePlayerInGame();
                 }
                 break;
         }
@@ -183,5 +189,17 @@ public class GameServerPacketHandler extends Thread {
                     break;
             }
         }
+    }
+
+    private void onReceivePlayerInGame() {
+        PlayerInGamePacket packet = new PlayerInGamePacket(data);
+
+        List<String> loggedUsers = packet.getLoggedUsers();
+
+        loggedUsers.forEach((account) -> {
+            gameserver.addAccountOnGameServer(account);
+            log.info("Account {} logged in Game Server {}[{}].", account,
+                    ServerNameDAO.getServer(gameserver.getGameServerInfo().getId()), gameserver.getGameServerInfo().getId());
+        });
     }
 }
