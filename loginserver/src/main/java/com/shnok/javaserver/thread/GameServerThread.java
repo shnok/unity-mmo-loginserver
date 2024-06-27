@@ -221,4 +221,12 @@ public class GameServerThread extends Thread {
         log.info("New gameserver connection state: {}", state);
         loginConnectionState = state;
     }
+
+    public int getServerId() {
+        return gameServerInfo.getId();
+    }
+
+    public String getServerName() {
+        return gameServerInfo.getName();
+    }
 }

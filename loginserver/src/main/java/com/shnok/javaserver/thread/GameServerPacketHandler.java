@@ -1,10 +1,7 @@
 package com.shnok.javaserver.thread;
 
 import com.shnok.javaserver.dto.external.serverpackets.PingPacket;
-import com.shnok.javaserver.dto.internal.gameserverpackets.BlowFishKeyPacket;
-import com.shnok.javaserver.dto.internal.gameserverpackets.GameServerAuthPacket;
-import com.shnok.javaserver.dto.internal.gameserverpackets.PlayerInGamePacket;
-import com.shnok.javaserver.dto.internal.gameserverpackets.ServerStatusPacket;
+import com.shnok.javaserver.dto.internal.gameserverpackets.*;
 import com.shnok.javaserver.dto.internal.loginserverpackets.AuthResponsePacket;
 import com.shnok.javaserver.enums.GameServerState;
 import com.shnok.javaserver.enums.LoginServerFailReason;
@@ -80,6 +77,9 @@ public class GameServerPacketHandler extends Thread {
                 }
                 if(type == GameServerPacketType.PlayerInGame) {
                     onReceivePlayerInGame();
+                }
+                if(type == GameServerPacketType.PlayerLogout) {
+                    onReceivePlayerLogout();
                 }
                 break;
         }
@@ -196,8 +196,18 @@ public class GameServerPacketHandler extends Thread {
 
         loggedUsers.forEach((account) -> {
             gameserver.addAccountOnGameServer(account);
-            log.info("Account {} logged in Game Server {}[{}].", account,
-                    ServerNameDAO.getServer(gameserver.getGameServerInfo().getId()), gameserver.getGameServerInfo().getId());
+            log.info("Account {} logged in Game Server {}[{}].", account, gameserver.getServerName(),
+                    gameserver.getServerId());
         });
+    }
+
+    private void onReceivePlayerLogout() {
+        PlayerLogoutPacket packet = new PlayerLogoutPacket(data);
+
+        gameserver.removeAccountOnGameServer(packet.getPlayer());
+
+        log.info("Player {} logged out from game server {}[{}].", packet.getPlayer(), gameserver.getServerName(),
+                gameserver.getServerId());
+
     }
 }
