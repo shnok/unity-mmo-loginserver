@@ -3,6 +3,7 @@ package com.shnok.javaserver.thread;
 import com.shnok.javaserver.dto.external.serverpackets.PingPacket;
 import com.shnok.javaserver.dto.internal.gameserverpackets.BlowFishKeyPacket;
 import com.shnok.javaserver.dto.internal.gameserverpackets.GameServerAuthPacket;
+import com.shnok.javaserver.dto.internal.gameserverpackets.ServerStatusPacket;
 import com.shnok.javaserver.dto.internal.loginserverpackets.AuthResponsePacket;
 import com.shnok.javaserver.enums.GameServerState;
 import com.shnok.javaserver.enums.LoginServerFailReason;
@@ -22,6 +23,8 @@ import java.security.interfaces.RSAPrivateKey;
 import java.util.Arrays;
 
 import static com.shnok.javaserver.config.Configuration.server;
+import static com.shnok.javaserver.dto.internal.gameserverpackets.ServerStatusPacket.MAX_PLAYERS;
+import static com.shnok.javaserver.dto.internal.gameserverpackets.ServerStatusPacket.SERVER_LIST_STATUS;
 import static com.shnok.javaserver.enums.GameServerState.BF_CONNECTED;
 
 @Log4j2
@@ -52,7 +55,7 @@ public class GameServerPacketHandler extends Thread {
         switch (state) {
             case CONNECTED:
                 if(type == GameServerPacketType.BlowFishKey) {
-                    onReceiveBlowfishKey(data);
+                    onReceiveBlowfishKey();
                 } else {
                     log.warn("Unknown Opcode {} in state {} from game server, closing connection!",
                             type, state);
@@ -61,7 +64,7 @@ public class GameServerPacketHandler extends Thread {
                 break;
             case BF_CONNECTED:
                 if(type == GameServerPacketType.AuthRequest) {
-                    onReceiveAuthRequest(data);
+                    onReceiveAuthRequest();
                 } else {
                     log.warn("Unknown Opcode {} in state {} from game server, closing connection!",
                             type, state);
@@ -69,11 +72,14 @@ public class GameServerPacketHandler extends Thread {
                 }
                 break;
             case AUTHED:
+                if(type == GameServerPacketType.ServerStatus) {
+                    onReceiveServerStatus();
+                }
                 break;
         }
     }
 
-    private void onReceiveBlowfishKey(byte[] data) {
+    private void onReceiveBlowfishKey() {
         BlowFishKeyPacket packet = new BlowFishKeyPacket(data, gameserver);
 
         gameserver.setBlowfish(new NewCrypt(packet.getBlowFishKey()));
@@ -81,7 +87,7 @@ public class GameServerPacketHandler extends Thread {
         gameserver.setLoginConnectionState(BF_CONNECTED);
     }
 
-    private void onReceiveAuthRequest(byte[] data) {
+    private void onReceiveAuthRequest() {
         GameServerAuthPacket packet = new GameServerAuthPacket(data);
 
         log.info("Auth request received.");
@@ -161,5 +167,21 @@ public class GameServerPacketHandler extends Thread {
             }
         }
         return true;
+    }
+
+    private void onReceiveServerStatus() {
+        ServerStatusPacket packet = new ServerStatusPacket(data);
+
+        GameServerInfo gsi = gameserver.getGameServerInfo();
+        for (ServerStatusPacket.Attribute attribute: packet.getAttributes()) {
+            switch (attribute.id) {
+                case SERVER_LIST_STATUS:
+                    gsi.setStatus(attribute.value);
+                    break;
+                case MAX_PLAYERS:
+                    gsi.setMaxPlayers(attribute.value);
+                    break;
+            }
+        }
     }
 }

@@ -5,6 +5,7 @@ import com.shnok.javaserver.thread.GameServerThread;
 import com.shnok.javaserver.util.ServerNameDAO;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.extern.log4j.Log4j2;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -12,6 +13,7 @@ import java.util.ArrayList;
 
 @Getter
 @Setter
+@Log4j2
 public class GameServerInfo {
     // auth
     private int id;
@@ -56,11 +58,16 @@ public class GameServerInfo {
         return ServerNameDAO.getServer(id);
     }
 
+    public void setStatus(int value) {
+        status = value;
+        log.info("Server {} status changed to {}.", getId(), getStatusName());
+    }
+
     public String getStatusName() {
          switch (status) {
-            case 0: return "Auto";
-            case 1: return "Good";
-            case 2: return "Normal";
+            case 0: return "Light";
+            case 1: return "Normal";
+            case 2: return "Heavy";
             case 3: return "Full";
             case 4: return "Down";
             case 5: return "GM Only";
