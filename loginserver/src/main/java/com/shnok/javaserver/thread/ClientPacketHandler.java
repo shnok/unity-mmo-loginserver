@@ -2,7 +2,9 @@ package com.shnok.javaserver.thread;
 
 import com.shnok.javaserver.db.entity.DBAccountInfo;
 import com.shnok.javaserver.dto.external.clientpackets.AuthRequestPacket;
+import com.shnok.javaserver.dto.external.clientpackets.RequestServerListPacket;
 import com.shnok.javaserver.dto.external.serverpackets.*;
+import com.shnok.javaserver.dto.internal.loginserverpackets.ReceivableListPacket;
 import com.shnok.javaserver.enums.*;
 import com.shnok.javaserver.enums.packettypes.ClientPacketType;
 import com.shnok.javaserver.model.GameServerInfo;
@@ -15,15 +17,12 @@ import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.net.InetAddress;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.security.interfaces.RSAPrivateKey;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.Collection;
 
 import static com.shnok.javaserver.config.Configuration.server;
-import static java.nio.charset.StandardCharsets.UTF_8;
 
 @Log4j2
 public class ClientPacketHandler extends Thread {
@@ -65,6 +64,8 @@ public class ClientPacketHandler extends Thread {
             case AuthRequest:
                 onReceiveAuth(data, client.getRSAPrivateKey());
                 break;
+            case RequestServerList:
+                onRequestServerList(data);
         }
     }
 
@@ -133,7 +134,7 @@ public class ClientPacketHandler extends Thread {
                 if (server.showLicense()) {
                     client.sendPacket(new LoginOkPacket(client.getSessionKey()));
                 } else {
-                    client.sendPacket(new ReceivableListPacket());
+                    client.sendPacket(new ServerListPacket());
                 }
 
                 break;
@@ -224,6 +225,16 @@ public class ClientPacketHandler extends Thread {
         } catch (Exception ex) {
             log.warn("There has been an error logging in!", ex);
             return false;
+        }
+    }
+
+    private void onRequestServerList(byte[] data) {
+        RequestServerListPacket packet = new RequestServerListPacket(data);
+
+        if(client.getSessionKey().checkLoginPair(packet.getSkey1(), packet.getSkey2())) {
+            client.sendPacket(new ServerListPacket());
+        } else {
+            client.close(LoginFailReason.REASON_ACCESS_FAILED);
         }
     }
 }

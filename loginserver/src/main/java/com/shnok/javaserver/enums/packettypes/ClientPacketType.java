@@ -6,15 +6,7 @@ import java.util.Map;
 public enum ClientPacketType {
     Ping((byte)0),
     AuthRequest((byte)1),
-    SendMessage((byte)2),
-    RequestMove((byte)3),
-    LoadWorld((byte)4),
-    RequestRotate((byte)5),
-    RequestAnim((byte)6),
-    RequestAttack((byte)7),
-    RequestMoveDirection((byte)8),
-    RequestSetTarget((byte)9),
-    RequestAutoAttack((byte)0x0A);
+    RequestServerList((byte)2);
 
     private final byte value;
 
