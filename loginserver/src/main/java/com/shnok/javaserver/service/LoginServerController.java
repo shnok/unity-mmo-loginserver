@@ -16,6 +16,7 @@ import java.security.spec.RSAKeyGenParameterSpec;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.shnok.javaserver.config.Configuration.server;
 import static java.security.spec.RSAKeyGenParameterSpec.F4;
 
 @Log4j2
@@ -60,7 +61,7 @@ public class LoginServerController {
 
     private void testCipher(RSAPrivateKey key) throws Exception {
         // avoid worst-case execution, KenM
-        Cipher rsaCipher = Cipher.getInstance("RSA/ECB/nopadding");
+        Cipher rsaCipher = Cipher.getInstance(server.rsaPaddingMode());
         rsaCipher.init(Cipher.DECRYPT_MODE, key);
     }
 

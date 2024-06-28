@@ -4,11 +4,11 @@ import com.shnok.javaserver.dto.SendablePacket;
 import com.shnok.javaserver.enums.packettypes.ServerPacketType;
 
 public class InitPacket extends SendablePacket {
-    public InitPacket(byte[] publicKey, byte[] blowfishKey, int sessionId) {
+    public InitPacket(byte[] scrambledMod, byte[] blowfishKey, int sessionId) {
         super(ServerPacketType.Init.getValue());
         writeI(sessionId);
-        writeI(publicKey.length);
-        writeB(publicKey);
+        writeI(scrambledMod.length);
+        writeB(scrambledMod);
         writeI(blowfishKey.length);
         writeB(blowfishKey);
 

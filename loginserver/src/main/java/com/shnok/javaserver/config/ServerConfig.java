@@ -30,16 +30,16 @@ public interface ServerConfig extends Mutable, Reloadable {
     Integer serverConnectionTimeoutMs();
     @Key("accept.new.gameserver")
     Boolean acceptNewGameserver();
-    @Key("flood.protection.enabled")
-    Boolean floodProtectionEnabled();
-    @Key("fast.connection.limit")
-    Integer fastConnectionLimit();
-    @Key("normal.connection.time")
-    Integer normalConnectionTime();
-    @Key("fast.connection.time")
-    Integer fastConnectionTime();
-    @Key("max.connection.per.ip")
-    Integer maxConnectionPerIp();
+//    @Key("flood.protection.enabled")
+//    Boolean floodProtectionEnabled();
+//    @Key("fast.connection.limit")
+//    Integer fastConnectionLimit();
+//    @Key("normal.connection.time")
+//    Integer normalConnectionTime();
+//    @Key("fast.connection.time")
+//    Integer fastConnectionTime();
+//    @Key("max.connection.per.ip")
+//    Integer maxConnectionPerIp();
     @Key("server.account.autocreate")
     Boolean autoCreateAccount();
     @Key("server.account.autocreate.access.level")
@@ -48,4 +48,6 @@ public interface ServerConfig extends Mutable, Reloadable {
     Integer accountInactiveLevel();
     @Key("server.show.license")
     Boolean showLicense();
+    @Key("rsa.padding.mode")
+    String rsaPaddingMode();
 }

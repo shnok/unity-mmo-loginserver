@@ -16,6 +16,7 @@ import java.net.InetAddress;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.interfaces.RSAPrivateKey;
+import java.util.Arrays;
 import java.util.Base64;
 
 import static com.shnok.javaserver.config.Configuration.server;
@@ -37,6 +38,17 @@ public class ClientPacketHandler extends Thread {
     }
 
     public void handle() {
+        log.debug("<--- Encrypted packet {} : {}", data.length, Arrays.toString(data));
+
+        try {
+            client.getLoginCrypt().decrypt(data, 0, data.length);
+        } catch (Exception e) {
+            log.error("Error while decrypting client packet: ", e);
+            return;
+        }
+
+        log.debug("<--- Decrypted packet {} : {}", data.length, Arrays.toString(data));
+
         ClientPacketType type = ClientPacketType.fromByte(data[0]);
 
         if(type != ClientPacketType.Ping) {
@@ -73,41 +85,39 @@ public class ClientPacketHandler extends Thread {
 
     private void onReceiveAuth(byte[] data, RSAPrivateKey privateKey) {
         AuthRequestPacket packet = new AuthRequestPacket(data, privateKey);
-        String username = packet.getUsername();
-        String password = packet.getUsername();
+        String account = packet.getAccount();
+        byte[] passHashBytes = packet.getPassHashBytes();
+
+        log.debug("Received auth for account: {}", account);
 
         InetAddress clientAddr = client.getConnection().getInetAddress();
 
         DBAccountInfo accountInfo;
-        try {
-            final MessageDigest md = MessageDigest.getInstance("SHA");
-            final byte[] raw = password.getBytes(UTF_8);
-            final String hashBase64 = Base64.getEncoder().encodeToString(md.digest(raw));
-            accountInfo = AccountInfoTable.getInstance().getAccountInfo(username);
 
-            if (accountInfo != null) {
-                if(!accountInfo.getPassHash().equals(hashBase64)) {
-                    // TODO: CLOSE CLIENT WITH LoginFailReason.REASON_USER_OR_PASS_WRONG
-                    client.disconnect();
-                    return;
-                }
+        final String hashBase64 = Base64.getEncoder().encodeToString(passHashBytes);
+        accountInfo = AccountInfoTable.getInstance().getAccountInfo(account);
 
-            } else if (server.autoCreateAccount()) {
-                accountInfo = new DBAccountInfo();
-                accountInfo.setLogin(username);
-                accountInfo.setPassHash(hashBase64);
-                accountInfo.setLastActive(System.currentTimeMillis());
-                accountInfo.setLastIp(client.getConnectionIp());
-                AccountInfoTable.getInstance().createAccount(accountInfo);
-                log.info("Autocreated account {}.", username);
-            } else {
+        if (accountInfo != null) {
+            if(!accountInfo.getPassHash().equals(hashBase64)) {
                 // TODO: CLOSE CLIENT WITH LoginFailReason.REASON_USER_OR_PASS_WRONG
                 client.disconnect();
                 return;
             }
-        } catch(NoSuchAlgorithmException e){
-            throw new RuntimeException(e);
+
+        } else if (server.autoCreateAccount()) {
+            accountInfo = new DBAccountInfo();
+            accountInfo.setLogin(account);
+            accountInfo.setPassHash(hashBase64);
+            accountInfo.setLastActive(System.currentTimeMillis());
+            accountInfo.setLastIp(client.getConnectionIp());
+            AccountInfoTable.getInstance().createAccount(accountInfo);
+            log.info("Autocreated account {}.", account);
+        } else {
+            // TODO: CLOSE CLIENT WITH LoginFailReason.REASON_USER_OR_PASS_WRONG
+            client.disconnect();
+            return;
         }
+
 
         AuthLoginResult result = tryCheckinAccount(accountInfo);
 

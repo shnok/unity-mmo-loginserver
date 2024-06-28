@@ -107,8 +107,6 @@ public abstract class SendablePacket extends Packet {
             for(int i = 0; i < paddingLength; i++) {
                 buffer.add((byte) 0);
             }
-
-            System.out.println(buffer.size());
         }
     }
 

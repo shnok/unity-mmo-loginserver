@@ -9,6 +9,7 @@ import lombok.extern.log4j.Log4j2;
 import javax.crypto.Cipher;
 import java.util.Arrays;
 
+import static com.shnok.javaserver.config.Configuration.server;
 import static com.shnok.javaserver.enums.GameServerState.BF_CONNECTED;
 import static javax.crypto.Cipher.DECRYPT_MODE;
 
@@ -16,6 +17,7 @@ import static javax.crypto.Cipher.DECRYPT_MODE;
 @Getter
 public class BlowFishKeyPacket extends ReceivablePacket {
     private byte[] blowFishKey;
+
     public BlowFishKeyPacket(byte[] data, GameServerThread gameServer) {
         super(data);
 
@@ -30,7 +32,7 @@ public class BlowFishKeyPacket extends ReceivablePacket {
 
         try {
             byte[] tempDecryptKey;
-            Cipher rsaCipher = Cipher.getInstance("RSA/ECB/nopadding");
+            Cipher rsaCipher = Cipher.getInstance(server.rsaPaddingMode());
             rsaCipher.init(DECRYPT_MODE, gameServer.getPrivateKey());
             tempDecryptKey = rsaCipher.doFinal(tempKey);
 

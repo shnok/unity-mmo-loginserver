@@ -12,6 +12,7 @@ import com.shnok.javaserver.security.LoginCrypt;
 import com.shnok.javaserver.security.Rnd;
 import com.shnok.javaserver.security.ScrambledKeyPair;
 import com.shnok.javaserver.service.LoginServerController;
+import com.shnok.javaserver.service.ThreadPoolManagerService;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.log4j.Log4j2;
@@ -78,7 +79,11 @@ public class LoginClientThread extends Thread {
         int length;
 
         try {
-            sendPacket(new InitPacket(getRSAPublicKey().getModulus().toByteArray(), getBlowfishKey(), sessionId));
+            System.out.println("MODULUS " + ((RSAPublicKey) scrambledPair.getPair().getPublic()).getModulus().toByteArray().length +   " : " + Arrays.toString(((RSAPublicKey) scrambledPair.getPair().getPublic()).getModulus().toByteArray()));
+            System.out.println("EXP: " + Arrays.toString(((RSAPublicKey) scrambledPair.getPair().getPublic()).getPublicExponent().toByteArray()));
+            System.out.println("SCRAMBLED: " + Arrays.toString(getScrambledPair().getScrambledModulus()));
+
+            sendPacket(new InitPacket(getScrambledPair().getScrambledModulus(), getBlowfishKey(), sessionId));
 
             for (; ; ) {
                 lengthLo = in.read();
@@ -158,7 +163,7 @@ public class LoginClientThread extends Thread {
     }
 
     void handlePacket(byte[] data) {
-        //ThreadPoolManagerService.getInstance().handlePacket(new ClientPacketHandlerThread(this, data));
+        ThreadPoolManagerService.getInstance().handlePacket(new ClientPacketHandler(this, data));
     }
 
     public void setLastEcho(long lastEcho, Timer watchDog) {
@@ -190,10 +195,6 @@ public class LoginClientThread extends Thread {
 
     public RSAPrivateKey getRSAPrivateKey() {
         return (RSAPrivateKey) scrambledPair.getPair().getPrivate();
-    }
-
-    public RSAPublicKey getRSAPublicKey() {
-        return (RSAPublicKey) scrambledPair.getPair().getPublic();
     }
 
     public boolean decrypt(byte[] packetData, int size) {
