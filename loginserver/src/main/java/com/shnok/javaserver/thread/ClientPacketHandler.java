@@ -5,6 +5,8 @@ import com.shnok.javaserver.dto.external.clientpackets.AuthRequestPacket;
 import com.shnok.javaserver.dto.external.serverpackets.*;
 import com.shnok.javaserver.enums.*;
 import com.shnok.javaserver.enums.packettypes.ClientPacketType;
+import com.shnok.javaserver.model.GameServerInfo;
+import com.shnok.javaserver.service.GameServerController;
 import com.shnok.javaserver.service.LoginServerController;
 import com.shnok.javaserver.service.db.AccountInfoTable;
 import lombok.extern.log4j.Log4j2;
@@ -18,6 +20,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.interfaces.RSAPrivateKey;
 import java.util.Arrays;
 import java.util.Base64;
+import java.util.Collection;
 
 import static com.shnok.javaserver.config.Configuration.server;
 import static java.nio.charset.StandardCharsets.UTF_8;
@@ -99,8 +102,7 @@ public class ClientPacketHandler extends Thread {
 
         if (accountInfo != null) {
             if(!accountInfo.getPassHash().equals(hashBase64)) {
-                // TODO: CLOSE CLIENT WITH LoginFailReason.REASON_USER_OR_PASS_WRONG
-                client.disconnect();
+                client.close(LoginFailReason.REASON_USER_OR_PASS_WRONG);
                 return;
             }
 
@@ -113,8 +115,7 @@ public class ClientPacketHandler extends Thread {
             AccountInfoTable.getInstance().createAccount(accountInfo);
             log.info("Autocreated account {}.", account);
         } else {
-            // TODO: CLOSE CLIENT WITH LoginFailReason.REASON_USER_OR_PASS_WRONG
-            client.disconnect();
+            client.close(LoginFailReason.REASON_USER_OR_PASS_WRONG);
             return;
         }
 
@@ -156,15 +157,16 @@ public class ClientPacketHandler extends Thread {
                 client.close(LoginFailReason.REASON_ACCOUNT_IN_USE);
                 break;
             case ALREADY_ON_GS:
-//                GameServerInfo gsi = lc.getAccountOnGameServer(info.getLogin());
-//                if (gsi != null) {
-//                    client.close(LoginFailReason.REASON_ACCOUNT_IN_USE);
-//
-//                    // kick from there
-//                    if (gsi.isAuthed()) {
-//                        gsi.getGameServerThread().kickPlayer(info.getLogin());
-//                    }
-//                }
+                GameServerInfo gsi = isAccountInAnyGameServer(account);
+                if (gsi != null) {
+                    client.close(LoginFailReason.REASON_ACCOUNT_IN_USE);
+
+                    // kick from there
+                    if (gsi.isAuthed()) {
+                        //gsi.getGameServerThread().kickPlayer(info.getLogin());
+                        //TODO: HANDLE KICK FROM GAME
+                    }
+                }
             break;
         }
     }
@@ -182,7 +184,7 @@ public class ClientPacketHandler extends Thread {
         if (canCheckIn(info)) {
             // login was successful, verify presence on game servers
             ret = AuthLoginResult.ALREADY_ON_GS;
-            if (!isAccountInAnyGameServer(info.getLogin())) {
+            if (isAccountInAnyGameServer(info.getLogin()) == null) {
                 // account isn't on any GS verify LS itself
                 ret = AuthLoginResult.ALREADY_ON_LS;
 
@@ -195,16 +197,15 @@ public class ClientPacketHandler extends Thread {
         return ret;
     }
 
-    public boolean isAccountInAnyGameServer(String account) {
-        // TODO: Check is account logges in on GS
-//        Collection<GameServerInfo> serverList = GameServerTable.getInstance().getRegisteredGameServers().values();
-//        for (GameServerInfo gsi : serverList) {
-//            GameServerThread gst = gsi.getGameServerThread();
-//            if ((gst != null) && gst.hasAccountOnGameServer(account)) {
-//                return true;
-//            }
-//        }
-        return false;
+    public GameServerInfo isAccountInAnyGameServer(String account) {
+        Collection<GameServerInfo> serverList = GameServerController.getInstance().getRegisteredGameServers().values();
+        for (GameServerInfo gsi : serverList) {
+            GameServerThread gst = gsi.getGameServerThread();
+            if ((gst != null) && gst.hasAccountOnGameServer(account)) {
+                return gsi;
+            }
+        }
+        return null;
     }
 
     public boolean canCheckIn(DBAccountInfo info) {

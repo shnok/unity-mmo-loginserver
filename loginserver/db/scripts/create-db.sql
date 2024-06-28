@@ -7,7 +7,8 @@ CREATE TABLE `accounts` (
   `lastactive` bigint(13) unsigned NOT NULL DEFAULT '0',
   `accessLevel` TINYINT NOT NULL DEFAULT 0,
   `lastIP` CHAR(15) NULL DEFAULT NULL,
-  `lastServer` TINYINT DEFAULT 1
+  `lastServer` TINYINT DEFAULT 1,
+  PRIMARY KEY (`login`)
 );
 
 DROP TABLE IF EXISTS `gameservers`;

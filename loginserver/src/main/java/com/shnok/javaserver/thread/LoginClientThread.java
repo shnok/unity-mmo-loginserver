@@ -1,7 +1,9 @@
 package com.shnok.javaserver.thread;
 
 import com.shnok.javaserver.dto.SendablePacket;
+import com.shnok.javaserver.dto.external.serverpackets.AccountKickedPacket;
 import com.shnok.javaserver.dto.external.serverpackets.InitPacket;
+import com.shnok.javaserver.dto.external.serverpackets.LoginFailPacket;
 import com.shnok.javaserver.enums.AccountKickedReason;
 import com.shnok.javaserver.enums.LoginClientState;
 import com.shnok.javaserver.enums.LoginFailReason;
@@ -114,13 +116,13 @@ public class LoginClientThread extends Thread {
         }
     }
 
-    public void close(AccountKickedReason failReason) {
-        //TODO: Send kick reason
+    public void close(AccountKickedReason kickedReason) {
+        sendPacket(new AccountKickedPacket(kickedReason));
         disconnect();
     }
 
     public void close(LoginFailReason failReason) {
-        //TODO: Send fail reason
+        sendPacket(new LoginFailPacket(failReason));
         disconnect();
     }
 
@@ -223,5 +225,13 @@ public class LoginClientThread extends Thread {
         }
 
         return true;
+    }
+
+    public void setLoginClientState(LoginClientState newState) {
+        if(getLoginClientState() != newState) {
+            loginClientState = newState;
+
+            log.debug("Account {} state updated to {}.", getUsername(), newState);
+        }
     }
 }
