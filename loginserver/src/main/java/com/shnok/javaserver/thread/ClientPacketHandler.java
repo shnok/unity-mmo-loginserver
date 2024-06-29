@@ -134,7 +134,7 @@ public class ClientPacketHandler extends Thread {
                 if (server.showLicense()) {
                     client.sendPacket(new LoginOkPacket(client.getSessionKey()));
                 } else {
-                    client.sendPacket(new ServerListPacket());
+                    client.sendPacket(new ServerListPacket(client));
                 }
 
                 break;
@@ -232,7 +232,8 @@ public class ClientPacketHandler extends Thread {
         RequestServerListPacket packet = new RequestServerListPacket(data);
 
         if(client.getSessionKey().checkLoginPair(packet.getSkey1(), packet.getSkey2())) {
-            client.sendPacket(new ServerListPacket());
+            log.debug("Session key verified.");
+            client.sendPacket(new ServerListPacket(client));
         } else {
             client.close(LoginFailReason.REASON_ACCESS_FAILED);
         }

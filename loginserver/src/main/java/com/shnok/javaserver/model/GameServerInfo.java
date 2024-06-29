@@ -27,9 +27,6 @@ public class GameServerInfo {
     private int port;
     // config
     private final boolean isPvp = true;
-    private int serverType;
-    private int ageLimit;
-    private boolean isShowingBrackets;
     private int maxPlayers;
 
     /**

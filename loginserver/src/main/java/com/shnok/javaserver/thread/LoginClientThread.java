@@ -29,6 +29,8 @@ import java.nio.ByteBuffer;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 @Getter
 @Setter
@@ -51,6 +53,8 @@ public class LoginClientThread extends Thread {
     private int lastGameserver;
     private int sessionId;
     private SessionKey sessionKey;
+    private Map<Integer, Integer> charsOnServers;
+    private Map<Integer, long[]> charsToDelete;
 
     public LoginClientThread(Socket con) {
         connection = con;
@@ -233,5 +237,27 @@ public class LoginClientThread extends Thread {
 
             log.debug("Account {} state updated to {}.", getUsername(), newState);
         }
+    }
+
+    public void setCharsOnServ(int servId, int chars) {
+        if (charsOnServers == null) {
+            charsOnServers = new HashMap<>();
+        }
+        charsOnServers.put(servId, chars);
+    }
+
+    public Map<Integer, Integer> getCharsOnServ() {
+        return charsOnServers;
+    }
+
+    public void serCharsWaitingDelOnServ(int servId, long[] charsToDel) {
+        if (charsToDelete == null) {
+            charsToDelete = new HashMap<>();
+        }
+        charsToDelete.put(servId, charsToDel);
+    }
+
+    public Map<Integer, long[]> getCharsWaitingDelOnServ() {
+        return charsToDelete;
     }
 }
