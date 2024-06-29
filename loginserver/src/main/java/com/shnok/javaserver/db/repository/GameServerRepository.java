@@ -10,6 +10,14 @@ import java.util.List;
 
 @Log4j2
 public class GameServerRepository implements GameServerDao {
+    private static GameServerRepository instance;
+    public static GameServerRepository getInstance() {
+        if (instance == null) {
+            instance = new GameServerRepository();
+        }
+        return instance;
+    }
+
     @Override
     public List<DBGameServer> getAllGameServers() {
         try (Session session = DbFactory.getSessionFactory().openSession()) {

@@ -1,16 +1,15 @@
 package com.shnok.javaserver.thread;
 
 import com.shnok.javaserver.db.entity.DBAccountInfo;
+import com.shnok.javaserver.db.repository.AccountInfoRepository;
 import com.shnok.javaserver.dto.external.clientpackets.AuthRequestPacket;
 import com.shnok.javaserver.dto.external.clientpackets.RequestServerListPacket;
 import com.shnok.javaserver.dto.external.serverpackets.*;
-import com.shnok.javaserver.dto.internal.loginserverpackets.ReceivableListPacket;
 import com.shnok.javaserver.enums.*;
 import com.shnok.javaserver.enums.packettypes.ClientPacketType;
 import com.shnok.javaserver.model.GameServerInfo;
 import com.shnok.javaserver.service.GameServerController;
 import com.shnok.javaserver.service.LoginServerController;
-import com.shnok.javaserver.service.db.AccountInfoTable;
 import lombok.extern.log4j.Log4j2;
 
 import javax.swing.*;
@@ -99,7 +98,7 @@ public class ClientPacketHandler extends Thread {
         DBAccountInfo accountInfo;
 
         final String hashBase64 = Base64.getEncoder().encodeToString(passHashBytes);
-        accountInfo = AccountInfoTable.getInstance().getAccountInfo(account);
+        accountInfo = AccountInfoRepository.getInstance().getAccountInfo(account);
 
         if (accountInfo != null) {
             if(!accountInfo.getPassHash().equals(hashBase64)) {
@@ -113,7 +112,7 @@ public class ClientPacketHandler extends Thread {
             accountInfo.setPassHash(hashBase64);
             accountInfo.setLastActive(System.currentTimeMillis());
             accountInfo.setLastIp(client.getConnectionIp());
-            AccountInfoTable.getInstance().createAccount(accountInfo);
+            AccountInfoRepository.getInstance().createAccount(accountInfo);
             log.info("Autocreated account {}.", account);
         } else {
             client.close(LoginFailReason.REASON_USER_OR_PASS_WRONG);
@@ -219,7 +218,7 @@ public class ClientPacketHandler extends Thread {
             info.setLastIp(client.getConnectionIp());
             info.setLastActive(System.currentTimeMillis());
 
-            AccountInfoTable.getInstance().updateAccount(info);
+            AccountInfoRepository.getInstance().updateAccount(info);
 
             return true;
         } catch (Exception ex) {

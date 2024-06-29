@@ -8,6 +8,14 @@ import org.hibernate.Session;
 
 @Log4j2
 public class AccountInfoRepository implements AccountInfoDao {
+    private static AccountInfoRepository instance;
+    public static AccountInfoRepository getInstance() {
+        if (instance == null) {
+            instance = new AccountInfoRepository();
+        }
+        return instance;
+    }
+
     @Override
     public DBAccountInfo getAccountInfo(String login) {
         try (Session session = DbFactory.getSessionFactory().openSession()) {

@@ -1,25 +1,16 @@
 package com.shnok.javaserver.thread;
 
-import com.shnok.javaserver.dto.external.serverpackets.PingPacket;
 import com.shnok.javaserver.dto.internal.gameserverpackets.*;
 import com.shnok.javaserver.dto.internal.loginserverpackets.AuthResponsePacket;
 import com.shnok.javaserver.enums.GameServerState;
 import com.shnok.javaserver.enums.LoginServerFailReason;
-import com.shnok.javaserver.enums.packettypes.ClientPacketType;
 import com.shnok.javaserver.enums.packettypes.GameServerPacketType;
-import com.shnok.javaserver.enums.packettypes.LoginServerPacketType;
 import com.shnok.javaserver.model.GameServerInfo;
 import com.shnok.javaserver.security.NewCrypt;
 import com.shnok.javaserver.service.GameServerController;
 import com.shnok.javaserver.service.LoginServerController;
-import com.shnok.javaserver.service.db.GameServerTable;
-import com.shnok.javaserver.util.ServerNameDAO;
 import lombok.extern.log4j.Log4j2;
 
-import javax.swing.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.security.interfaces.RSAPrivateKey;
 import java.util.Arrays;
 import java.util.List;
 

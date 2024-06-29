@@ -1,9 +1,9 @@
 package com.shnok.javaserver.service;
 
 import com.shnok.javaserver.db.entity.DBGameServer;
+import com.shnok.javaserver.db.repository.GameServerRepository;
 import com.shnok.javaserver.model.GameServerInfo;
 import com.shnok.javaserver.security.Rnd;
-import com.shnok.javaserver.service.db.GameServerTable;
 import com.shnok.javaserver.util.HexUtils;
 import lombok.Getter;
 import lombok.Setter;
@@ -54,7 +54,7 @@ public class GameServerController {
     }
 
     private void loadRegisteredGameServers() {
-        List<DBGameServer> gameServerList = GameServerTable.getInstance().getAllGameServers();
+        List<DBGameServer> gameServerList = GameServerRepository.getInstance().getAllGameServers();
         gameServerList.forEach(gameServer -> {
             GAME_SERVER_TABLE.put(gameServer.getServerId(), new GameServerInfo(gameServer.getServerId(),
                     HexUtils.stringToHex(gameServer.getHexId())));
@@ -147,7 +147,7 @@ public class GameServerController {
         gameServer.setServerId(id);
         gameServer.setHost(externalHost);
 
-        GameServerTable.getInstance().addGameServer(gameServer);
+        GameServerRepository.getInstance().addGameServer(gameServer);
     }
 
     /**
