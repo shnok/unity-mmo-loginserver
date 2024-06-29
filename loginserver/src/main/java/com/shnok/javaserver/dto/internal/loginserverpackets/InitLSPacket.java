@@ -1,7 +1,7 @@
 package com.shnok.javaserver.dto.internal.loginserverpackets;
 
 import com.shnok.javaserver.dto.SendablePacket;
-import com.shnok.javaserver.enums.packettypes.LoginServerPacketType;
+import com.shnok.javaserver.enums.packettypes.internal.LoginServerPacketType;
 import lombok.extern.log4j.Log4j2;
 
 import java.util.Arrays;

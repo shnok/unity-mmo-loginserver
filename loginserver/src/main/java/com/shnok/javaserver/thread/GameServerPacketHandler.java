@@ -2,10 +2,12 @@ package com.shnok.javaserver.thread;
 
 import com.shnok.javaserver.dto.internal.gameserverpackets.*;
 import com.shnok.javaserver.dto.internal.loginserverpackets.AuthResponsePacket;
+import com.shnok.javaserver.dto.internal.loginserverpackets.PlayerAuthResponsePacket;
 import com.shnok.javaserver.enums.GameServerState;
 import com.shnok.javaserver.enums.LoginServerFailReason;
-import com.shnok.javaserver.enums.packettypes.GameServerPacketType;
+import com.shnok.javaserver.enums.packettypes.internal.GameServerPacketType;
 import com.shnok.javaserver.model.GameServerInfo;
+import com.shnok.javaserver.model.SessionKey;
 import com.shnok.javaserver.security.NewCrypt;
 import com.shnok.javaserver.service.GameServerController;
 import com.shnok.javaserver.service.LoginServerController;
@@ -80,6 +82,9 @@ public class GameServerPacketHandler extends Thread {
                 }
                 if(type == GameServerPacketType.ReplyCharacters) {
                     onReceiveCharacters();
+                }
+                if(type == GameServerPacketType.PlayerAuthRequest) {
+                    onReceivePlayerAuthRequest();
                 }
                 break;
         }
@@ -217,5 +222,23 @@ public class GameServerPacketHandler extends Thread {
         log.info("Received {} character(s) for account {}.", packet.getCharCount(), packet.getAccount());
         LoginServerController.getInstance().setCharactersOnServer(packet.getAccount(),
                 packet.getCharCount(), gameserver.getServerId());
+    }
+
+    private void onReceivePlayerAuthRequest() {
+        PlayerAuthRequestPacket packet = new PlayerAuthRequestPacket(data);
+
+        SessionKey sessionKey = new SessionKey(packet.getLoginOkID1(), packet.getLoginOkID2(),
+                packet.getPlayOkID1(), packet.getPlayOkID2());
+
+        PlayerAuthResponsePacket authResponse;
+        SessionKey key = LoginServerController.getInstance().getKeyForAccount(packet.getAccount());
+        if ((key != null) && key.equals(sessionKey)) {
+            LoginServerController.getInstance().removeAuthedClient(packet.getAccount());
+            authResponse = new PlayerAuthResponsePacket(packet.getAccount(), true);
+        } else {
+            authResponse = new PlayerAuthResponsePacket(packet.getAccount(), false);
+        }
+
+        gameserver.sendPacket(authResponse);
     }
 }

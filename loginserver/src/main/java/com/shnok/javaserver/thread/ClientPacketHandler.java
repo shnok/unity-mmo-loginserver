@@ -7,7 +7,7 @@ import com.shnok.javaserver.dto.external.clientpackets.RequestServerListPacket;
 import com.shnok.javaserver.dto.external.clientpackets.RequestServerLoginPacket;
 import com.shnok.javaserver.dto.external.serverpackets.*;
 import com.shnok.javaserver.enums.*;
-import com.shnok.javaserver.enums.packettypes.ClientPacketType;
+import com.shnok.javaserver.enums.packettypes.external.ClientPacketType;
 import com.shnok.javaserver.model.GameServerInfo;
 import com.shnok.javaserver.model.SessionKey;
 import com.shnok.javaserver.service.GameServerController;

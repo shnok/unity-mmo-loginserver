@@ -5,8 +5,8 @@ import lombok.Getter;
 
 @Getter
 public class RequestServerListPacket extends ReceivablePacket {
-    private int skey1;
-    private int skey2;
+    private final int skey1;
+    private final int skey2;
 
     public RequestServerListPacket(byte[] data) {
         super(data);

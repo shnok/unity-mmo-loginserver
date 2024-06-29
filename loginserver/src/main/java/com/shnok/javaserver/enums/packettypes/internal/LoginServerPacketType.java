@@ -1,4 +1,4 @@
-package com.shnok.javaserver.enums.packettypes;
+package com.shnok.javaserver.enums.packettypes.internal;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -8,7 +8,8 @@ public enum LoginServerPacketType {
     Fail((byte)1),
     AuthResponse((byte) 2),
     ReceivableList((byte) 3),
-    RequestCharacters((byte) 4);
+    RequestCharacters((byte) 4),
+    PlayerAuthResponse((byte)5);
 
     private final byte value;
 

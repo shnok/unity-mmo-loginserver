@@ -1,7 +1,7 @@
 package com.shnok.javaserver.dto.internal.loginserverpackets;
 
 import com.shnok.javaserver.dto.SendablePacket;
-import com.shnok.javaserver.enums.packettypes.LoginServerPacketType;
+import com.shnok.javaserver.enums.packettypes.internal.LoginServerPacketType;
 
 public class AuthResponsePacket extends SendablePacket {
     public AuthResponsePacket(int id) {

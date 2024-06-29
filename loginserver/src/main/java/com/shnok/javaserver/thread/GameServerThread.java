@@ -1,13 +1,11 @@
 package com.shnok.javaserver.thread;
 
-import com.shnok.javaserver.dto.Packet;
 import com.shnok.javaserver.dto.SendablePacket;
 import com.shnok.javaserver.dto.internal.loginserverpackets.InitLSPacket;
 import com.shnok.javaserver.dto.internal.loginserverpackets.LoginServerFailPacket;
 import com.shnok.javaserver.dto.internal.loginserverpackets.RequestCharactersPacket;
 import com.shnok.javaserver.enums.GameServerState;
-import com.shnok.javaserver.enums.packettypes.LoginServerPacketType;
-import com.shnok.javaserver.enums.packettypes.ServerPacketType;
+import com.shnok.javaserver.enums.packettypes.internal.LoginServerPacketType;
 import com.shnok.javaserver.model.GameServerInfo;
 import com.shnok.javaserver.security.NewCrypt;
 import com.shnok.javaserver.service.GameServerController;
@@ -18,7 +16,6 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.log4j.Log4j2;
 
-import javax.swing.*;
 import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.io.InputStream;

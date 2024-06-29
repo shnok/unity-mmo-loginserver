@@ -1,7 +1,7 @@
 package com.shnok.javaserver.dto.external.serverpackets;
 
 import com.shnok.javaserver.dto.SendablePacket;
-import com.shnok.javaserver.enums.packettypes.ServerPacketType;
+import com.shnok.javaserver.enums.packettypes.external.ServerPacketType;
 import com.shnok.javaserver.model.GameServerInfo;
 import com.shnok.javaserver.service.GameServerController;
 import com.shnok.javaserver.thread.LoginClientThread;

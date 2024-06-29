@@ -89,16 +89,18 @@ public class LoginServerController {
     }
 
     public LoginClientThread getClient(String login) {
-        for (LoginClientThread client: clients) {
-            if(client.getUsername() == null) {
-                continue;
+        synchronized (clients) {
+            for (LoginClientThread client : clients) {
+                if (client.getUsername() == null) {
+                    continue;
+                }
+                if (client.getUsername().equals(login)) {
+                    return client;
+                }
             }
-            if(client.getUsername().equals(login)) {
-                return client;
-            }
-        }
 
-        return null;
+            return null;
+        }
     }
 
     public void removeClient(LoginClientThread s) {
@@ -160,5 +162,20 @@ public class LoginServerController {
             return loginOk;
         }
         return false;
+    }
+
+    public SessionKey getKeyForAccount(String account) {
+        LoginClientThread client = getClient(account);
+        if (client != null) {
+            return client.getSessionKey();
+        }
+        return null;
+    }
+
+    public void removeAuthedClient(String account) {
+        LoginClientThread client = getClient(account);
+        if(client != null) {
+            removeClient(client);
+        }
     }
 }
