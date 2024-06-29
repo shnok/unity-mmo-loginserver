@@ -50,6 +50,8 @@ public class ServerListPacket extends SendablePacket {
                 writeB((byte) servId);
                 writeB(charsOnServers.get(servId).byteValue());
 
+                log.debug("Client has {} character(s) on server {}", charsOnServers.get(servId), servId);
+
 //                if ((charsToDelete == null) || !charsToDelete.containsKey(servId)) {
 //                    writeB((byte) 0x00);
 //                } else {
@@ -73,6 +75,8 @@ public class ServerListPacket extends SendablePacket {
             servers.add(new ServerData(client, gsi));
         }
         charsOnServers = client.getCharsOnServ();
+
+        log.debug("Client as {} character(s) on all servers.", charsOnServers.size());
 //        charsToDelete = client.getCharsWaitingDelOnServ();
     }
 

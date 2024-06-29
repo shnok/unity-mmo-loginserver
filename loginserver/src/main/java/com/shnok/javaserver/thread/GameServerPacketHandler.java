@@ -223,6 +223,7 @@ public class GameServerPacketHandler extends Thread {
     private void onReceiveCharacters() {
         ReplyCharactersPacket packet = new ReplyCharactersPacket(data);
 
+        log.info("Received {} character(s) for account {}.", packet.getCharCount(), packet.getAccount());
         LoginServerController.getInstance().setCharactersOnServer(packet.getAccount(),
                 packet.getCharCount(), gameserver.getServerId());
     }
