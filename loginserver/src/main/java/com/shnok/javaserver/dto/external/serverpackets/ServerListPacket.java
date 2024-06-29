@@ -74,10 +74,12 @@ public class ServerListPacket extends SendablePacket {
         for (GameServerInfo gsi : GameServerController.getInstance().getRegisteredGameServers().values()) {
             servers.add(new ServerData(client, gsi));
         }
+
         charsOnServers = client.getCharsOnServ();
 
-        log.debug("Client as {} character(s) on all servers.", charsOnServers.size());
-//        charsToDelete = client.getCharsWaitingDelOnServ();
+        if(charsOnServers != null) {
+            log.debug("Client as {} character(s) on all servers.", charsOnServers.size());
+        }
     }
 
     static class ServerData {

@@ -4,9 +4,11 @@ import com.shnok.javaserver.dto.SendablePacket;
 import com.shnok.javaserver.dto.external.serverpackets.AccountKickedPacket;
 import com.shnok.javaserver.dto.external.serverpackets.InitPacket;
 import com.shnok.javaserver.dto.external.serverpackets.LoginFailPacket;
+import com.shnok.javaserver.dto.external.serverpackets.PlayFailPacket;
 import com.shnok.javaserver.enums.AccountKickedReason;
 import com.shnok.javaserver.enums.LoginClientState;
 import com.shnok.javaserver.enums.LoginFailReason;
+import com.shnok.javaserver.enums.PlayFailReason;
 import com.shnok.javaserver.enums.packettypes.LoginServerPacketType;
 import com.shnok.javaserver.enums.packettypes.ServerPacketType;
 import com.shnok.javaserver.model.SessionKey;
@@ -51,6 +53,7 @@ public class LoginClientThread extends Thread {
     private final byte[] blowfishKey;
     private int accessLevel;
     private int lastGameserver;
+    private boolean joinedGS;
     private int sessionId;
     private SessionKey sessionKey;
     private Map<Integer, Integer> charsOnServers;
@@ -127,6 +130,11 @@ public class LoginClientThread extends Thread {
 
     public void close(LoginFailReason failReason) {
         sendPacket(new LoginFailPacket(failReason));
+        disconnect();
+    }
+
+    public void close(PlayFailReason failReason) {
+        sendPacket(new PlayFailPacket(failReason));
         disconnect();
     }
 

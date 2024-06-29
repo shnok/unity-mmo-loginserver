@@ -6,7 +6,8 @@ import java.util.Map;
 public enum ClientPacketType {
     Ping((byte)0),
     AuthRequest((byte)1),
-    RequestServerList((byte)2);
+    RequestServerList((byte)2),
+    RequestServerLogin((byte)3);
 
     private final byte value;
 

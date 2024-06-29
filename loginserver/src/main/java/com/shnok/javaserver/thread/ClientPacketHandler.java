@@ -4,10 +4,12 @@ import com.shnok.javaserver.db.entity.DBAccountInfo;
 import com.shnok.javaserver.db.repository.AccountInfoRepository;
 import com.shnok.javaserver.dto.external.clientpackets.AuthRequestPacket;
 import com.shnok.javaserver.dto.external.clientpackets.RequestServerListPacket;
+import com.shnok.javaserver.dto.external.clientpackets.RequestServerLoginPacket;
 import com.shnok.javaserver.dto.external.serverpackets.*;
 import com.shnok.javaserver.enums.*;
 import com.shnok.javaserver.enums.packettypes.ClientPacketType;
 import com.shnok.javaserver.model.GameServerInfo;
+import com.shnok.javaserver.model.SessionKey;
 import com.shnok.javaserver.service.GameServerController;
 import com.shnok.javaserver.service.LoginServerController;
 import lombok.extern.log4j.Log4j2;
@@ -61,10 +63,14 @@ public class ClientPacketHandler extends Thread {
                 onReceiveEcho();
                 break;
             case AuthRequest:
-                onReceiveAuth(data, client.getRSAPrivateKey());
+                onReceiveAuth(client.getRSAPrivateKey());
                 break;
             case RequestServerList:
-                onRequestServerList(data);
+                onRequestServerList();
+                break;
+            case RequestServerLogin:
+                onRequestServerLogin();
+                break;
         }
     }
 
@@ -86,7 +92,7 @@ public class ClientPacketHandler extends Thread {
         client.setLastEcho(System.currentTimeMillis(), timer);
     }
 
-    private void onReceiveAuth(byte[] data, RSAPrivateKey privateKey) {
+    private void onReceiveAuth(RSAPrivateKey privateKey) {
         AuthRequestPacket packet = new AuthRequestPacket(data, privateKey);
         String account = packet.getAccount();
         byte[] passHashBytes = packet.getPassHashBytes();
@@ -227,12 +233,29 @@ public class ClientPacketHandler extends Thread {
         }
     }
 
-    private void onRequestServerList(byte[] data) {
+    private void onRequestServerList() {
         RequestServerListPacket packet = new RequestServerListPacket(data);
 
         if(client.getSessionKey().checkLoginPair(packet.getSkey1(), packet.getSkey2())) {
             log.debug("Session key verified.");
             client.sendPacket(new ServerListPacket(client));
+        } else {
+            client.close(LoginFailReason.REASON_ACCESS_FAILED);
+        }
+    }
+
+    private void onRequestServerLogin() {
+        RequestServerLoginPacket packet = new RequestServerLoginPacket(data);
+
+        SessionKey sk = client.getSessionKey();
+        // if we didn't show the license we can't check these values
+        if (server.showLicense() || sk.checkLoginPair(packet.getSkey1(), packet.getSkey2())) {
+            if (LoginServerController.getInstance().isLoginPossible(client, packet.getServerId())) {
+                client.setJoinedGS(true);
+                client.sendPacket(new PlayOkPacket(sk));
+            } else {
+                client.sendPacket(new PlayFailPacket(PlayFailReason.REASON_SERVER_OVERLOADED));
+            }
         } else {
             client.close(LoginFailReason.REASON_ACCESS_FAILED);
         }

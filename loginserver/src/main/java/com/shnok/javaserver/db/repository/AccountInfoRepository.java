@@ -49,4 +49,18 @@ public class AccountInfoRepository implements AccountInfoDao {
             log.error("SQL ERROR: {}", e.getMessage(), e);
         }
     }
+
+    @Override
+    public void updateAccountLastServer(String account, int serverId) {
+        try (Session session = DbFactory.getSessionFactory().openSession()) {
+            session.beginTransaction();
+            session.createQuery("UPDATE DBAccountInfo i SET lastServer=:lastServer WHERE login=:login")
+                    .setParameter("login", account)
+                    .setParameter("lastServer", serverId)
+                    .executeUpdate();
+            session.getTransaction().commit();
+        } catch (Exception e) {
+            log.error("SQL ERROR: {}", e.getMessage(), e);
+        }
+    }
 }

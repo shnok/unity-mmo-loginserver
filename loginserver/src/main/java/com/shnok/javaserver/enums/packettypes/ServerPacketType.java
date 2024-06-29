@@ -8,8 +8,10 @@ public enum ServerPacketType {
     Init((byte)1),
     LoginOk((byte)2),
     LoginFail((byte)3),
-    ServerList((byte) 4),
-    AccountKicked((byte) 5);
+    ServerList((byte)4),
+    AccountKicked((byte)5),
+    PlayFail((byte)6),
+    PlayOk((byte)7);
 
     private final byte value;
 

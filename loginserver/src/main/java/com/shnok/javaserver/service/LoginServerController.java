@@ -1,6 +1,8 @@
 package com.shnok.javaserver.service;
 
+import com.shnok.javaserver.db.repository.AccountInfoRepository;
 import com.shnok.javaserver.dto.SendablePacket;
+import com.shnok.javaserver.enums.ServerStatus;
 import com.shnok.javaserver.model.GameServerInfo;
 import com.shnok.javaserver.model.SessionKey;
 import com.shnok.javaserver.security.Rnd;
@@ -140,9 +142,23 @@ public class LoginServerController {
         if (charsNum > 0) {
             client.setCharsOnServ(serverId, charsNum);
         }
+    }
 
-//        if (timeToDel.length > 0) {
-//            client.serCharsWaitingDelOnServ(serverId, timeToDel);
-//        }
+    public boolean isLoginPossible(LoginClientThread client, int serverId) {
+        GameServerInfo gsi = GameServerController.getInstance().getRegisteredGameServerById(serverId);
+        int access = client.getAccessLevel();
+        if ((gsi != null) && gsi.isAuthed()) {
+            boolean loginOk =
+                    ((gsi.getCurrentPlayerCount() < gsi.getMaxPlayers())
+                            && (gsi.getStatus() != ServerStatus.STATUS_GM_ONLY.getCode()))
+                            || (access > 0);
+
+            if (loginOk && (client.getLastGameserver() != serverId)) {
+                //update account last server
+                AccountInfoRepository.getInstance().updateAccountLastServer(client.getUsername(), serverId);
+            }
+            return loginOk;
+        }
+        return false;
     }
 }

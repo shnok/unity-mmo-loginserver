@@ -8,4 +8,6 @@ public interface AccountInfoDao {
     public DBAccountInfo getAccountInfo(String login);
     public void createAccount(DBAccountInfo accountInfo);
     public void updateAccount(DBAccountInfo accountInfo);
+
+    void updateAccountLastServer(String account, int serverId);
 }
