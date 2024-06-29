@@ -11,6 +11,7 @@ import com.shnok.javaserver.enums.packettypes.LoginServerPacketType;
 import com.shnok.javaserver.model.GameServerInfo;
 import com.shnok.javaserver.security.NewCrypt;
 import com.shnok.javaserver.service.GameServerController;
+import com.shnok.javaserver.service.LoginServerController;
 import com.shnok.javaserver.service.db.GameServerTable;
 import com.shnok.javaserver.util.ServerNameDAO;
 import lombok.extern.log4j.Log4j2;
@@ -47,6 +48,11 @@ public class GameServerPacketHandler extends Thread {
         gameserver.getBlowfish().decrypt(data, 0, data.length);
         log.debug("<--- Decrypted packet {} : {}", data.length, Arrays.toString(data));
 
+        if(!NewCrypt.verifyChecksum(data)) {
+            log.warn("Packet's checksum is wrong.");
+            return;
+        }
+
         GameServerPacketType type = GameServerPacketType.fromByte(data[0]);
 
         log.debug("Received packet: {}", type);
@@ -80,6 +86,9 @@ public class GameServerPacketHandler extends Thread {
                 }
                 if(type == GameServerPacketType.PlayerLogout) {
                     onReceivePlayerLogout();
+                }
+                if(type == GameServerPacketType.ReplyCharacters) {
+                    onReceiveCharacters();
                 }
                 break;
         }
@@ -209,5 +218,12 @@ public class GameServerPacketHandler extends Thread {
         log.info("Player {} logged out from game server {}[{}].", packet.getPlayer(), gameserver.getServerName(),
                 gameserver.getServerId());
 
+    }
+
+    private void onReceiveCharacters() {
+        ReplyCharactersPacket packet = new ReplyCharactersPacket(data);
+
+        LoginServerController.getInstance().setCharactersOnServer(packet.getAccount(),
+                packet.getCharCount(), gameserver.getServerId());
     }
 }

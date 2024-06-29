@@ -12,6 +12,6 @@ public class InitPacket extends SendablePacket {
         writeI(blowfishKey.length);
         writeB(blowfishKey);
 
-        buildPacket(true);
+        buildPacket();
     }
 }

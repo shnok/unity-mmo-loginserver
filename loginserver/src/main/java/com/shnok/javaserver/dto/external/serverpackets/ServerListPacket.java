@@ -63,7 +63,7 @@ public class ServerListPacket extends SendablePacket {
             writeB((byte) 0x00);
         }
 
-        buildPacket(true);
+        buildPacket();
     }
 
     private void fillServerList(LoginClientThread client) {

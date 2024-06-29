@@ -11,6 +11,6 @@ public class LoginOkPacket extends SendablePacket {
         writeI(sessionKey.loginOkID1);
         writeI(sessionKey.loginOkID2);
 
-        buildPacket(true);
+        buildPacket();
     }
 }

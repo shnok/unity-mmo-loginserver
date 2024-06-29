@@ -7,7 +7,8 @@ public enum LoginServerPacketType {
     InitLS((byte)0),
     Fail((byte)1),
     AuthResponse((byte) 2),
-    ReceivableList((byte) 3);
+    ReceivableList((byte) 3),
+    RequestCharacters((byte) 4);
 
     private final byte value;
 

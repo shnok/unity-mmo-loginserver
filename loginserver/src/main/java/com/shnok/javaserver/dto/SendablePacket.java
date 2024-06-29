@@ -79,7 +79,7 @@ public abstract class SendablePacket extends Packet {
     }
 
     protected void buildPacket() {
-        buildPacket(false);
+        buildPacket(true);
     }
 
     protected void buildPacket(boolean padXor) {

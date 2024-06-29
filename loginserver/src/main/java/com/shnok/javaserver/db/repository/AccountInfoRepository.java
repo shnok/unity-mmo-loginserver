@@ -11,7 +11,8 @@ public class AccountInfoRepository implements AccountInfoDao {
     @Override
     public DBAccountInfo getAccountInfo(String login) {
         try (Session session = DbFactory.getSessionFactory().openSession()) {
-            return session.createQuery("SELECT i FROM DBAccountInfo i WHERE login='" + login + "'", DBAccountInfo.class)
+            return session.createQuery("SELECT i FROM DBAccountInfo i WHERE login=:login", DBAccountInfo.class)
+                    .setParameter("login", login)
                     .getSingleResult();
         } catch (Exception e) {
             log.error("SQL ERROR: {}", e.getMessage(), e);

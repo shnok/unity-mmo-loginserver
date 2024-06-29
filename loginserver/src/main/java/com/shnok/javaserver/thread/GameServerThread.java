@@ -4,6 +4,7 @@ import com.shnok.javaserver.dto.Packet;
 import com.shnok.javaserver.dto.SendablePacket;
 import com.shnok.javaserver.dto.internal.loginserverpackets.InitLSPacket;
 import com.shnok.javaserver.dto.internal.loginserverpackets.LoginServerFailPacket;
+import com.shnok.javaserver.dto.internal.loginserverpackets.RequestCharactersPacket;
 import com.shnok.javaserver.enums.GameServerState;
 import com.shnok.javaserver.enums.packettypes.LoginServerPacketType;
 import com.shnok.javaserver.enums.packettypes.ServerPacketType;
@@ -119,6 +120,8 @@ public class GameServerThread extends Thread {
         LoginServerPacketType packetType = LoginServerPacketType.fromByte(packet.getType());
         log.debug("Sent packet: {}", packetType);
 
+        NewCrypt.appendChecksum(packet.getData());
+
         log.debug("---> Clear packet {} : {}", packet.getData().length, Arrays.toString(packet.getData()));
         blowfish.crypt(packet.getData(), 0, packet.getData().length);
         log.debug("---> Encrypted packet {} : {}", packet.getData().length, Arrays.toString(packet.getData()));
@@ -229,5 +232,9 @@ public class GameServerThread extends Thread {
 
     public String getServerName() {
         return gameServerInfo.getName();
+    }
+
+    public void requestCharacters(String account) {
+        sendPacket(new RequestCharactersPacket(account));
     }
 }

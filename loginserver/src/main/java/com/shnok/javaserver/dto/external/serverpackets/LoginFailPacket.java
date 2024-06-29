@@ -9,6 +9,6 @@ public class LoginFailPacket extends SendablePacket {
         super(ServerPacketType.LoginFail.getValue());
         writeB((byte) loginFailReason.getCode());
 
-        buildPacket(true);
+        buildPacket();
     }
 }

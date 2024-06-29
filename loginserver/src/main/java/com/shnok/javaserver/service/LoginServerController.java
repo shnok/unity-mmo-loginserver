@@ -1,6 +1,7 @@
 package com.shnok.javaserver.service;
 
 import com.shnok.javaserver.dto.SendablePacket;
+import com.shnok.javaserver.model.GameServerInfo;
 import com.shnok.javaserver.model.SessionKey;
 import com.shnok.javaserver.security.Rnd;
 import com.shnok.javaserver.security.ScrambledKeyPair;
@@ -14,6 +15,7 @@ import java.security.KeyPairGenerator;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.spec.RSAKeyGenParameterSpec;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import static com.shnok.javaserver.config.Configuration.server;
@@ -107,40 +109,6 @@ public class LoginServerController {
         return clients;
     }
 
-    // Broadcast to everyone ignoring caller
-    public void broadcast(SendablePacket packet, LoginClientThread current) {
-        synchronized (clients) {
-            for (LoginClientThread c : clients) {
-                if (c.authenticated && c != current) {
-                    c.sendPacket(packet);
-                }
-            }
-        }
-    }
-
-   // Broadcast to everyone
-   public void broadcast(SendablePacket packet) {
-        synchronized (clients) {
-            for (LoginClientThread c : clients) {
-                if (c.authenticated) {
-                    c.sendPacket(packet);
-                }
-            }
-        }
-    }
-
-    public boolean userExists(String user) {
-        synchronized (clients) {
-            for (LoginClientThread c : clients) {
-                if (c.authenticated) {
-                    return c.getUsername().equals(user);
-                }
-            }
-
-            return false;
-        }
-    }
-
     public ScrambledKeyPair getScrambledRSAKeyPair() {
         return keyPairs[Rnd.nextInt(10)];
     }
@@ -154,6 +122,27 @@ public class LoginServerController {
     }
 
     public void getCharactersOnAccount(String account) {
-        // TODO: get character list for account
+        Collection<GameServerInfo> serverList = GameServerController.getInstance().getRegisteredGameServers().values();
+        for (GameServerInfo gsi : serverList) {
+            if (gsi.isAuthed()) {
+                gsi.getGameServerThread().requestCharacters(account);
+            }
+        }
+    }
+
+    public void setCharactersOnServer(String account, int charsNum, int serverId) {
+        LoginClientThread client = getClient(account);
+
+        if (client == null) {
+            return;
+        }
+
+        if (charsNum > 0) {
+            client.setCharsOnServ(serverId, charsNum);
+        }
+
+//        if (timeToDel.length > 0) {
+//            client.serCharsWaitingDelOnServ(serverId, timeToDel);
+//        }
     }
 }

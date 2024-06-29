@@ -9,6 +9,6 @@ public class AccountKickedPacket extends SendablePacket {
         super(ServerPacketType.AccountKicked.getValue());
         writeB(kickedReason.getCode());
 
-        buildPacket(true);
+        buildPacket();
     }
 }
