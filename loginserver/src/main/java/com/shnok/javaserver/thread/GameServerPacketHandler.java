@@ -39,9 +39,9 @@ public class GameServerPacketHandler extends Thread {
     }
 
     public void handle() {
-        log.debug("<--- Encrypted packet {} : {}", data.length, Arrays.toString(data));
+        log.debug("<--- [GAME] Encrypted packet {} : {}", data.length, Arrays.toString(data));
         gameserver.getBlowfish().decrypt(data, 0, data.length);
-        log.debug("<--- Decrypted packet {} : {}", data.length, Arrays.toString(data));
+        log.debug("<--- [GAME] Decrypted packet {} : {}", data.length, Arrays.toString(data));
 
         if(!NewCrypt.verifyChecksum(data)) {
             log.warn("Packet's checksum is wrong.");
@@ -234,6 +234,8 @@ public class GameServerPacketHandler extends Thread {
 
         PlayerAuthResponsePacket authResponse;
         SessionKey key = LoginServerController.getInstance().getKeyForAccount(packet.getAccount());
+        log.debug("Received session key: {}.", sessionKey);
+        log.debug("Local session key: {}.", key);
         if ((key != null) && key.equals(sessionKey)) {
             LoginServerController.getInstance().removeAuthedClient(packet.getAccount());
             authResponse = new PlayerAuthResponsePacket(packet.getAccount(), true);

@@ -10,6 +10,7 @@ import com.shnok.javaserver.enums.*;
 import com.shnok.javaserver.enums.packettypes.external.ClientPacketType;
 import com.shnok.javaserver.model.GameServerInfo;
 import com.shnok.javaserver.model.SessionKey;
+import com.shnok.javaserver.security.NewCrypt;
 import com.shnok.javaserver.service.GameServerController;
 import com.shnok.javaserver.service.LoginServerController;
 import lombok.extern.log4j.Log4j2;
@@ -41,16 +42,21 @@ public class ClientPacketHandler extends Thread {
     }
 
     public void handle() {
-        log.debug("<--- Encrypted packet {} : {}", data.length, Arrays.toString(data));
+        log.debug("<--- [CLIENT] Encrypted packet {} : {}", data.length, Arrays.toString(data));
 
         try {
             client.getLoginCrypt().decrypt(data, 0, data.length);
         } catch (Exception e) {
-            log.error("Error while decrypting client packet: ", e);
+            log.warn("[CLIENT] Error while decrypting client packet: ", e);
             return;
         }
 
-        log.debug("<--- Decrypted packet {} : {}", data.length, Arrays.toString(data));
+        log.debug("<--- [CLIENT] Decrypted packet {} : {}", data.length, Arrays.toString(data));
+
+        if(!NewCrypt.verifyChecksum(data)) {
+            log.warn("[CLIENT] Packet's checksum is wrong.");
+            return;
+        }
 
         ClientPacketType type = ClientPacketType.fromByte(data[0]);
 
@@ -135,8 +141,14 @@ public class ClientPacketHandler extends Thread {
                 client.setLoginClientState(LoginClientState.AUTHED_LOGIN);
                 client.setSessionKey(LoginServerController.getInstance().getNewSessionKey());
                 LoginServerController.getInstance().getCharactersOnAccount(accountInfo.getLogin());
-                break;
 
+                //TODO sync or add delay in order to get all the characters before showing serverlist
+                if (server.showLicense()) {
+                    client.sendPacket(new LoginOkPacket(client.getSessionKey()));
+                } else {
+                    client.sendPacket(new ServerListPacket(client));
+                }
+                break;
             case INVALID_PASSWORD:
                 client.close(LoginFailReason.REASON_USER_OR_PASS_WRONG);
                 break;

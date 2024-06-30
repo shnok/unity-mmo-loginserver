@@ -1,9 +1,6 @@
 package com.shnok.javaserver.service;
 
 import com.shnok.javaserver.db.repository.AccountInfoRepository;
-import com.shnok.javaserver.dto.SendablePacket;
-import com.shnok.javaserver.dto.external.serverpackets.LoginOkPacket;
-import com.shnok.javaserver.dto.external.serverpackets.ServerListPacket;
 import com.shnok.javaserver.enums.ServerStatus;
 import com.shnok.javaserver.model.GameServerInfo;
 import com.shnok.javaserver.model.SessionKey;
@@ -145,12 +142,6 @@ public class LoginServerController {
 
         if (charsNum > 0) {
             client.setCharsOnServ(serverId, charsNum);
-        }
-
-        if (server.showLicense()) {
-            client.sendPacket(new LoginOkPacket(client.getSessionKey()));
-        } else {
-            client.sendPacket(new ServerListPacket(client));
         }
     }
 

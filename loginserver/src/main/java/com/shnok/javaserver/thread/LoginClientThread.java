@@ -98,7 +98,7 @@ public class LoginClientThread extends Thread {
                 length = (lengthHi * 256) + lengthLo;
 
                 if ((lengthHi < 0) || connection.isClosed()) {
-                    log.warn("Gameserver terminated the connection!");
+                    log.warn("Loginserver terminated the connection!");
                     break;
                 }
 
@@ -147,13 +147,13 @@ public class LoginClientThread extends Thread {
 
     public boolean sendPacket(SendablePacket packet) {
         ServerPacketType packetType = ServerPacketType.fromByte(packet.getType());
-        log.debug("Sent packet: {}", packetType);
+        log.debug("[CLIENT] Sent packet: {}", packetType);
 
-        log.debug("---> Clear packet {} : {}", packet.getData().length, Arrays.toString(packet.getData()));
+        log.debug("---> [CLIENT] Clear packet {} : {}", packet.getData().length, Arrays.toString(packet.getData()));
         if(!encrypt(packet.getData(), packet.getData().length)) {
             return false;
         }
-        log.debug("---> Encrypted packet {} : {}", packet.getData().length, Arrays.toString(packet.getData()));
+        log.debug("---> [CLIENT] Encrypted packet {} : {}", packet.getData().length, Arrays.toString(packet.getData()));
 
         try {
             synchronized (out) {

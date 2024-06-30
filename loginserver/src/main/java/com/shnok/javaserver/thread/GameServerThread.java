@@ -115,13 +115,13 @@ public class GameServerThread extends Thread {
 
     public boolean sendPacket(SendablePacket packet) {
         LoginServerPacketType packetType = LoginServerPacketType.fromByte(packet.getType());
-        log.debug("Sent packet: {}", packetType);
+        log.debug("[GAME] Sent packet: {}", packetType);
 
         NewCrypt.appendChecksum(packet.getData());
 
-        log.debug("---> Clear packet {} : {}", packet.getData().length, Arrays.toString(packet.getData()));
+        log.debug("---> [GAME] Clear packet {} : {}", packet.getData().length, Arrays.toString(packet.getData()));
         blowfish.crypt(packet.getData(), 0, packet.getData().length);
-        log.debug("---> Encrypted packet {} : {}", packet.getData().length, Arrays.toString(packet.getData()));
+        log.debug("---> [GAME] Encrypted packet {} : {}", packet.getData().length, Arrays.toString(packet.getData()));
 
         try {
             synchronized (out) {
