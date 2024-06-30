@@ -1,8 +1,13 @@
 package com.shnok.javaserver.security;
 
+import lombok.extern.log4j.Log4j2;
+
 import java.io.IOException;
 import java.util.Arrays;
 
+import static com.shnok.javaserver.config.Configuration.server;
+
+@Log4j2
 public class LoginCrypt {
     private static final byte[] STATIC_BLOWFISH_KEY = {
             (byte) 0x6b,
@@ -67,15 +72,20 @@ public class LoginCrypt {
     public int encrypt(byte[] raw, final int offset, int size) throws IOException {
         if (_static) {
 
-            System.out.println("RAW: " + Arrays.toString(raw));
-            NewCrypt.encXORPass(raw, offset, size, Rnd.nextInt());
-            System.out.println("XOR: " + Arrays.toString(raw));
-            _STATIC_CRYPT.crypt(raw, offset, size);
-            System.out.println("CRYPT: " + Arrays.toString(raw));
+            if(server.printCryptography()) {
+                log.debug("INIT Packet encryption:");
+                log.debug("CLEAR: " + Arrays.toString(raw));
+            }
 
-            byte[] decrypted = Arrays.copyOf(raw, raw.length);
-            _STATIC_CRYPT.decrypt(decrypted, offset, size);
-            System.out.println("DECRYPTED: " + Arrays.toString(decrypted));
+            NewCrypt.encXORPass(raw, offset, size, Rnd.nextInt());
+            if(server.printCryptography()) {
+                log.debug("XORED: " + Arrays.toString(raw));
+            }
+
+            _STATIC_CRYPT.crypt(raw, offset, size);
+            if(server.printCryptography()) {
+                log.debug("ENCRYPTED: " + Arrays.toString(raw));
+            }
 
             _static = false;
         } else {

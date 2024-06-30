@@ -42,7 +42,9 @@ public class ClientPacketHandler extends Thread {
     }
 
     public void handle() {
-        log.debug("<--- [CLIENT] Encrypted packet {} : {}", data.length, Arrays.toString(data));
+        if(server.printCryptography()) {
+            log.debug("<--- [CLIENT] Encrypted packet {} : {}", data.length, Arrays.toString(data));
+        }
 
         try {
             client.getLoginCrypt().decrypt(data, 0, data.length);
@@ -51,7 +53,9 @@ public class ClientPacketHandler extends Thread {
             return;
         }
 
-        log.debug("<--- [CLIENT] Decrypted packet {} : {}", data.length, Arrays.toString(data));
+        if(server.printCryptography()) {
+            log.debug("<--- [CLIENT] Decrypted packet {} : {}", data.length, Arrays.toString(data));
+        }
 
         if(!NewCrypt.verifyChecksum(data)) {
             log.warn("[CLIENT] Packet's checksum is wrong.");
@@ -60,7 +64,7 @@ public class ClientPacketHandler extends Thread {
 
         ClientPacketType type = ClientPacketType.fromByte(data[0]);
 
-        if(type != ClientPacketType.Ping) {
+        if(server.printReceivedPackets() && type != ClientPacketType.Ping) {
             log.debug("Received packet: {}", type);
         }
 
@@ -83,10 +87,10 @@ public class ClientPacketHandler extends Thread {
     private void onReceiveEcho() {
         client.sendPacket(new PingPacket());
 
-        Timer timer = new Timer(100, new ActionListener() {
+        Timer timer = new Timer(client.getConnectionTimeoutMs() + 100, new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent arg0) {
-                if (System.currentTimeMillis() - client.getLastEcho() >= server.serverConnectionTimeoutMs()) {
+                if (System.currentTimeMillis() - client.getLastEcho() >= client.getConnectionTimeoutMs()) {
                     log.info("User connection timeout.");
                     client.disconnect();
                 }

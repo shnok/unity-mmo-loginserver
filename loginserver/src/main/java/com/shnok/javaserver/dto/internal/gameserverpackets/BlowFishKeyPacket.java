@@ -27,8 +27,9 @@ public class BlowFishKeyPacket extends ReceivablePacket {
 
         byte[] tempKey = readB(blowfishLength);
 
-        log.debug("Encrypted blowfish key length: {}", tempKey.length);
-        log.debug("Encrypted blowfish key: {}", Arrays.toString(tempKey));
+        if(server.printCryptography()) {
+            log.debug("Encrypted blowfish key [{}]: {}", tempKey.length, Arrays.toString(tempKey));
+        }
 
         try {
             byte[] tempDecryptKey;
@@ -48,7 +49,9 @@ public class BlowFishKeyPacket extends ReceivablePacket {
             byte[] key = new byte[len - i];
             System.arraycopy(tempDecryptKey, i, key, 0, len - i);
 
-            log.debug("Decrypted blowfish key: {}", Arrays.toString(key));
+            if(server.printCryptography()) {
+                log.debug("Decrypted blowfish key: {}", Arrays.toString(key));
+            }
 
             blowFishKey = key;
         } catch (Exception ex) {

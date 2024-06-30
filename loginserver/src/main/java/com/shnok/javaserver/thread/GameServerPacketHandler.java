@@ -1,7 +1,5 @@
 package com.shnok.javaserver.thread;
 
-import com.shnok.javaserver.dto.external.serverpackets.LoginOkPacket;
-import com.shnok.javaserver.dto.external.serverpackets.ServerListPacket;
 import com.shnok.javaserver.dto.internal.gameserverpackets.*;
 import com.shnok.javaserver.dto.internal.loginserverpackets.AuthResponsePacket;
 import com.shnok.javaserver.dto.internal.loginserverpackets.PlayerAuthResponsePacket;
@@ -39,9 +37,13 @@ public class GameServerPacketHandler extends Thread {
     }
 
     public void handle() {
-        log.debug("<--- [GAME] Encrypted packet {} : {}", data.length, Arrays.toString(data));
+        if(server.printCryptography()) {
+            log.debug("<--- [GAME] Encrypted packet {} : {}", data.length, Arrays.toString(data));
+        }
         gameserver.getBlowfish().decrypt(data, 0, data.length);
-        log.debug("<--- [GAME] Decrypted packet {} : {}", data.length, Arrays.toString(data));
+        if(server.printCryptography()) {
+            log.debug("<--- [GAME] Decrypted packet {} : {}", data.length, Arrays.toString(data));
+        }
 
         if(!NewCrypt.verifyChecksum(data)) {
             log.warn("Packet's checksum is wrong.");
@@ -50,7 +52,9 @@ public class GameServerPacketHandler extends Thread {
 
         GameServerPacketType type = GameServerPacketType.fromByte(data[0]);
 
-        log.debug("Received packet: {}", type);
+        if(server.printReceivedPackets()) {
+            log.debug("Received packet: {}", type);
+        }
 
         GameServerState state = gameserver.getLoginConnectionState();
         switch (state) {

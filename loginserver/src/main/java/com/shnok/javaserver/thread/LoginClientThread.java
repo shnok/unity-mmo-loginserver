@@ -32,6 +32,8 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
+import static com.shnok.javaserver.config.Configuration.server;
+
 @Getter
 @Setter
 @Log4j2
@@ -56,6 +58,7 @@ public class LoginClientThread extends Thread {
     private SessionKey sessionKey;
     private Map<Integer, Integer> charsOnServers;
     private Map<Integer, long[]> charsToDelete;
+    private int connectionTimeoutMs;
 
     public LoginClientThread(Socket con) {
         connection = con;
@@ -65,6 +68,7 @@ public class LoginClientThread extends Thread {
         loginCrypt = new LoginCrypt();
         loginCrypt.setKey(blowfishKey);
         sessionId = Rnd.nextInt();
+        connectionTimeoutMs = server.serverConnectionTimeoutMs();
 
         try {
             in = connection.getInputStream();
@@ -86,9 +90,9 @@ public class LoginClientThread extends Thread {
         int length;
 
         try {
-            System.out.println("MODULUS " + ((RSAPublicKey) scrambledPair.getPair().getPublic()).getModulus().toByteArray().length +   " : " + Arrays.toString(((RSAPublicKey) scrambledPair.getPair().getPublic()).getModulus().toByteArray()));
-            System.out.println("EXP: " + Arrays.toString(((RSAPublicKey) scrambledPair.getPair().getPublic()).getPublicExponent().toByteArray()));
-            System.out.println("SCRAMBLED: " + Arrays.toString(getScrambledPair().getScrambledModulus()));
+//            System.out.println("MODULUS " + ((RSAPublicKey) scrambledPair.getPair().getPublic()).getModulus().toByteArray().length +   " : " + Arrays.toString(((RSAPublicKey) scrambledPair.getPair().getPublic()).getModulus().toByteArray()));
+//            System.out.println("EXP: " + Arrays.toString(((RSAPublicKey) scrambledPair.getPair().getPublic()).getPublicExponent().toByteArray()));
+//            System.out.println("SCRAMBLED: " + Arrays.toString(getScrambledPair().getScrambledModulus()));
 
             sendPacket(new InitPacket(getScrambledPair().getScrambledModulus(), getBlowfishKey(), sessionId));
 
@@ -147,13 +151,20 @@ public class LoginClientThread extends Thread {
 
     public boolean sendPacket(SendablePacket packet) {
         ServerPacketType packetType = ServerPacketType.fromByte(packet.getType());
-        log.debug("[CLIENT] Sent packet: {}", packetType);
 
-        log.debug("---> [CLIENT] Clear packet {} : {}", packet.getData().length, Arrays.toString(packet.getData()));
+        if(server.printSentPackets()) {
+            log.debug("[CLIENT] Sent packet: {}", packetType);
+        }
+
+        if(server.printCryptography()) {
+            log.debug("---> [CLIENT] Clear packet {} : {}", packet.getData().length, Arrays.toString(packet.getData()));
+        }
         if(!encrypt(packet.getData(), packet.getData().length)) {
             return false;
         }
-        log.debug("---> [CLIENT] Encrypted packet {} : {}", packet.getData().length, Arrays.toString(packet.getData()));
+        if(server.printCryptography()) {
+            log.debug("---> [CLIENT] Encrypted packet {} : {}", packet.getData().length, Arrays.toString(packet.getData()));
+        }
 
         try {
             synchronized (out) {

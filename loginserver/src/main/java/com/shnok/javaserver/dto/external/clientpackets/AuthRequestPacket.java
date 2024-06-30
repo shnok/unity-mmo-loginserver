@@ -28,24 +28,28 @@ public class AuthRequestPacket extends ReceivablePacket {
             rsaCipher.init(Cipher.DECRYPT_MODE, privateKey);
 
             decrypted = Arrays.copyOfRange(data, 1,  1 + 128);
-            log.debug("Encrypted RSA: {}", Arrays.toString(decrypted));
+
+            if(server.printCryptography()) {
+                log.debug("Encrypted client RSA: {}", Arrays.toString(decrypted));
+            }
 
             decrypted = rsaCipher.doFinal(decrypted, 0x00, 0x80);
 
-            log.debug("Decrypted RSA: {}", Arrays.toString(decrypted));
+            if(server.printCryptography()) {
+                log.debug("Decrypted client RSA: {}", Arrays.toString(decrypted));
+            }
         } catch (Exception ex) {
             log.warn("There has been an error trying to login!", ex);
             return;
         }
 
         int accountBlockLength = decrypted[0];
-        log.debug("Account block length: " + accountBlockLength);
-        int shaBlockLength = decrypted[accountBlockLength + 1];
-        log.debug("Password block length: " + shaBlockLength);
         try {
             account = new String(decrypted, 1, accountBlockLength).trim().toLowerCase();
             passHashBytes = Arrays.copyOfRange(decrypted, accountBlockLength + 2, decrypted.length);
-            log.debug("Password hash: {}", HexUtils.hexToString(passHashBytes));
+            if(server.printCryptography()) {
+                log.debug("Password hash: {}", HexUtils.hexToString(passHashBytes));
+            }
         } catch (Exception ex) {
             log.warn("There has been an error parsing credentials!", ex);
         }

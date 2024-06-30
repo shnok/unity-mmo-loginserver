@@ -28,6 +28,8 @@ import java.util.Arrays;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+import static com.shnok.javaserver.config.Configuration.server;
+
 @Getter
 @Setter
 @Log4j2
@@ -113,15 +115,22 @@ public class GameServerThread extends Thread {
         ThreadPoolManagerService.getInstance().handlePacket(new GameServerPacketHandler(this, data));
     }
 
-    public boolean sendPacket(SendablePacket packet) {
+    public void sendPacket(SendablePacket packet) {
         LoginServerPacketType packetType = LoginServerPacketType.fromByte(packet.getType());
-        log.debug("[GAME] Sent packet: {}", packetType);
+
+        if(server.printSentPackets()) {
+            log.debug("[GAME] Sent packet: {}", packetType);
+        }
 
         NewCrypt.appendChecksum(packet.getData());
 
-        log.debug("---> [GAME] Clear packet {} : {}", packet.getData().length, Arrays.toString(packet.getData()));
+        if(server.printCryptography()) {
+            log.debug("---> [GAME] Clear packet {} : {}", packet.getData().length, Arrays.toString(packet.getData()));
+        }
         blowfish.crypt(packet.getData(), 0, packet.getData().length);
-        log.debug("---> [GAME] Encrypted packet {} : {}", packet.getData().length, Arrays.toString(packet.getData()));
+        if(server.printCryptography()) {
+            log.debug("---> [GAME] Encrypted packet {} : {}", packet.getData().length, Arrays.toString(packet.getData()));
+        }
 
         try {
             synchronized (out) {
@@ -134,12 +143,9 @@ public class GameServerThread extends Thread {
                 out.flush();
             }
 
-            return true;
         } catch (IOException e) {
             log.warn("Trying to send packet to a gameserver connection.");
         }
-
-        return false;
     }
 
     public void disconnect() {
