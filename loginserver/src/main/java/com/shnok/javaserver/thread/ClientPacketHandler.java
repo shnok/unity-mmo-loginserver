@@ -135,13 +135,6 @@ public class ClientPacketHandler extends Thread {
                 client.setLoginClientState(LoginClientState.AUTHED_LOGIN);
                 client.setSessionKey(LoginServerController.getInstance().getNewSessionKey());
                 LoginServerController.getInstance().getCharactersOnAccount(accountInfo.getLogin());
-
-                if (server.showLicense()) {
-                    client.sendPacket(new LoginOkPacket(client.getSessionKey()));
-                } else {
-                    client.sendPacket(new ServerListPacket(client));
-                }
-
                 break;
 
             case INVALID_PASSWORD:

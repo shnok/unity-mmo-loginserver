@@ -1,5 +1,7 @@
 package com.shnok.javaserver.thread;
 
+import com.shnok.javaserver.dto.external.serverpackets.LoginOkPacket;
+import com.shnok.javaserver.dto.external.serverpackets.ServerListPacket;
 import com.shnok.javaserver.dto.internal.gameserverpackets.*;
 import com.shnok.javaserver.dto.internal.loginserverpackets.AuthResponsePacket;
 import com.shnok.javaserver.dto.internal.loginserverpackets.PlayerAuthResponsePacket;
