@@ -1,0 +1,36 @@
+###
+# VS/MD solution and project files
+###
+unity-client/[Ee]xportedObj/
+*.booproj
+*.csproj
+*.sln
+*.suo
+*.svd
+*.unityproj
+*.user
+*.userprefs
+*.pidb
+.DS_Store
+
+###
+# OS generated
+###
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+Icon?
+ehthumbs.db
+Thumbs.db
+
+*.iws
+workspace.xml
+tasks.xml
+java-server/out/
+*.bak
+*.log
+.gradle
+build
+*.trace.db
