@@ -2,6 +2,7 @@ package com.shnok.javaserver.thread;
 
 import com.shnok.javaserver.dto.SendablePacket;
 import com.shnok.javaserver.dto.internal.loginserverpackets.InitLSPacket;
+import com.shnok.javaserver.dto.internal.loginserverpackets.KickPlayerPacket;
 import com.shnok.javaserver.dto.internal.loginserverpackets.LoginServerFailPacket;
 import com.shnok.javaserver.dto.internal.loginserverpackets.RequestCharactersPacket;
 import com.shnok.javaserver.enums.GameServerState;
@@ -239,5 +240,9 @@ public class GameServerThread extends Thread {
 
     public void requestCharacters(String account) {
         sendPacket(new RequestCharactersPacket(account));
+    }
+
+    public void kickPlayer(String account) {
+        sendPacket(new KickPlayerPacket(account));
     }
 }

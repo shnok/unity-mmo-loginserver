@@ -53,7 +53,7 @@ public class GameServerPacketHandler extends Thread {
         GameServerPacketType type = GameServerPacketType.fromByte(data[0]);
 
         if(server.printReceivedPackets()) {
-            log.debug("Received packet: {}", type);
+            log.debug("[GAME] Received packet: {}", type);
         }
 
         GameServerState state = gameserver.getLoginConnectionState();

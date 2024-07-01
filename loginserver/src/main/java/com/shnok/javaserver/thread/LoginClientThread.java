@@ -1,10 +1,7 @@
 package com.shnok.javaserver.thread;
 
 import com.shnok.javaserver.dto.SendablePacket;
-import com.shnok.javaserver.dto.external.serverpackets.AccountKickedPacket;
-import com.shnok.javaserver.dto.external.serverpackets.InitPacket;
-import com.shnok.javaserver.dto.external.serverpackets.LoginFailPacket;
-import com.shnok.javaserver.dto.external.serverpackets.PlayFailPacket;
+import com.shnok.javaserver.dto.external.serverpackets.*;
 import com.shnok.javaserver.enums.AccountKickedReason;
 import com.shnok.javaserver.enums.LoginClientState;
 import com.shnok.javaserver.enums.LoginFailReason;
@@ -59,6 +56,7 @@ public class LoginClientThread extends Thread {
     private Map<Integer, Integer> charsOnServers;
     private Map<Integer, long[]> charsToDelete;
     private int connectionTimeoutMs;
+    private int expectedCharacterCount;
 
     public LoginClientThread(Socket con) {
         connection = con;
@@ -152,7 +150,7 @@ public class LoginClientThread extends Thread {
     public boolean sendPacket(SendablePacket packet) {
         ServerPacketType packetType = ServerPacketType.fromByte(packet.getType());
 
-        if(server.printSentPackets()) {
+        if(server.printSentPackets() && packetType != ServerPacketType.Ping) {
             log.debug("[CLIENT] Sent packet: {}", packetType);
         }
 
@@ -261,6 +259,14 @@ public class LoginClientThread extends Thread {
             charsOnServers = new HashMap<>();
         }
         charsOnServers.put(servId, chars);
+
+        if(charsOnServers.size() >= expectedCharacterCount) {
+            if (server.showLicense()) {
+                sendPacket(new LoginOkPacket(getSessionKey()));
+            } else {
+                sendPacket(new ServerListPacket(this));
+            }
+        }
     }
 
     public Map<Integer, Integer> getCharsOnServ() {
