@@ -178,8 +178,7 @@ public class ClientPacketHandler extends Thread {
 
                     // kick from there
                     if (gsi.isAuthed()) {
-                        //gsi.getGameServerThread().kickPlayer(info.getLogin());
-                        //TODO: HANDLE KICK FROM GAME
+                        gsi.getGameServerThread().kickPlayer(account);
                     }
                 }
             break;
