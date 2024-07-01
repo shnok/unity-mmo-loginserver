@@ -124,11 +124,16 @@ public class LoginServerController {
         return new SessionKey(Rnd.nextInt(), Rnd.nextInt(), Rnd.nextInt(), Rnd.nextInt());
     }
 
-    public void getCharactersOnAccount(String account) {
+    public void getCharactersOnAccount(LoginClientThread client, String account) {
         Collection<GameServerInfo> serverList = GameServerController.getInstance().getRegisteredGameServers().values();
+
+        client.setExpectedCharacterCount(serverList.size());
+
         for (GameServerInfo gsi : serverList) {
             if (gsi.isAuthed()) {
                 gsi.getGameServerThread().requestCharacters(account);
+            } else {
+                client.setCharsOnServ(gsi.getId(), 0);
             }
         }
     }
@@ -140,9 +145,8 @@ public class LoginServerController {
             return;
         }
 
-        if (charsNum > 0) {
-            client.setCharsOnServ(serverId, charsNum);
-        }
+
+        client.setCharsOnServ(serverId, charsNum);
     }
 
     public boolean isLoginPossible(LoginClientThread client, int serverId) {

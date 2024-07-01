@@ -65,7 +65,7 @@ public class ClientPacketHandler extends Thread {
         ClientPacketType type = ClientPacketType.fromByte(data[0]);
 
         if(server.printReceivedPackets() && type != ClientPacketType.Ping) {
-            log.debug("Received packet: {}", type);
+            log.debug("[CLIENT] Received packet: {}", type);
         }
 
         switch (type) {
@@ -144,14 +144,8 @@ public class ClientPacketHandler extends Thread {
                 client.setUsername(accountInfo.getLogin());
                 client.setLoginClientState(LoginClientState.AUTHED_LOGIN);
                 client.setSessionKey(LoginServerController.getInstance().getNewSessionKey());
-                LoginServerController.getInstance().getCharactersOnAccount(accountInfo.getLogin());
 
-                //TODO sync or add delay in order to get all the characters before showing serverlist
-                if (server.showLicense()) {
-                    client.sendPacket(new LoginOkPacket(client.getSessionKey()));
-                } else {
-                    client.sendPacket(new ServerListPacket(client));
-                }
+                LoginServerController.getInstance().getCharactersOnAccount(client, accountInfo.getLogin());
                 break;
             case INVALID_PASSWORD:
                 client.close(LoginFailReason.REASON_USER_OR_PASS_WRONG);
