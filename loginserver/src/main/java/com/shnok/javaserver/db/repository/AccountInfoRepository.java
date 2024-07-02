@@ -23,7 +23,7 @@ public class AccountInfoRepository implements AccountInfoDao {
                     .setParameter("login", login)
                     .getSingleResult();
         } catch (Exception e) {
-            log.error("SQL ERROR: {}", e.getMessage(), e);
+            log.warn(e.getMessage());
             return null;
         }
     }
