@@ -6,7 +6,7 @@ CREATE TABLE `accounts` (
   `created_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `lastactive` bigint(13) unsigned NOT NULL DEFAULT '0',
   `accessLevel` TINYINT NOT NULL DEFAULT 0,
-  `lastIP` CHAR(15) NULL DEFAULT NULL,
+  `lastIP` VARCHAR(32) NULL DEFAULT NULL,
   `lastServer` TINYINT DEFAULT 1,
   PRIMARY KEY (`login`)
 );
