@@ -41,6 +41,15 @@ public interface ServerConfig extends Mutable, Reloadable {
     @Key("rsa.padding.mode")
     String rsaPaddingMode();
 
+    // Database
+    @Key("database.jdbc.url")
+    String jdbcUrl();
+    @Key("database.jdbc.username")
+    String jdbcUsername();
+    @Key("database.jdbc.password")
+    @DefaultValue("")
+    String jdbcPassword();
+
     //Logger
     @Key("logger.print.received-packets")
     Boolean printReceivedPackets();
