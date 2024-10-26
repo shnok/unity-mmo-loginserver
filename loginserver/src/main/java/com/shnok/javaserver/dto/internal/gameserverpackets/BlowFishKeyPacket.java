@@ -21,8 +21,6 @@ public class BlowFishKeyPacket extends ReceivablePacket {
     public BlowFishKeyPacket(byte[] data, GameServerThread gameServer) {
         super(data);
 
-        readB();
-        readB();
         int blowfishLength = readI();
 
         byte[] tempKey = readB(blowfishLength);

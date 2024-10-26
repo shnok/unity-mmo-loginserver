@@ -35,9 +35,6 @@ public class ServerStatusPacket extends ReceivablePacket {
 
         attributes = new ArrayList<>();
 
-        readB();
-        readB();
-
         int totalAttributes = readI();
         for(int i = 0; i < totalAttributes; i++) {
             int attributeType = readI();

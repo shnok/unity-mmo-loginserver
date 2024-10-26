@@ -26,6 +26,8 @@ public interface ServerConfig extends Mutable, Reloadable {
     String gameserverHost();
     @Key("gameserver.port")
     Integer gameserverPort();
+    @Key("revision")
+    Integer revision();
     @Key("server.connection.timeout.ms")
     Integer serverConnectionTimeoutMs();
     @Key("accept.new.gameserver")
