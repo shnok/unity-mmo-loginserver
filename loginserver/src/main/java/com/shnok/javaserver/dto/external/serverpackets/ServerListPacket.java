@@ -42,7 +42,6 @@ public class ServerListPacket extends SendablePacket {
             writeI(server.currentPlayers);
             writeI(server.maxPlayers);
             writeB((byte) server.status);
-            System.out.println(server.status);
         }
 
         if (charsOnServers != null) {

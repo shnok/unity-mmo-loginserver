@@ -22,7 +22,7 @@ public abstract class SendablePacket extends Packet {
         try {
             if (s != null) {
                 byte[] d = s.getBytes(StandardCharsets.UTF_16LE);
-                write(d);
+                write(d, false);
                 writeB((byte)0);
                 writeB((byte)0);
             }
@@ -108,8 +108,14 @@ public abstract class SendablePacket extends Packet {
     }
 
     protected void write(byte[] data) {
+        write(data, true);
+    }
 
-        buffer.add((byte) data.length);
+    protected void write(byte[] data, boolean dataArray) {
+        if(dataArray) {
+            buffer.add((byte) data.length);
+        }
+
         List<Byte> byteList = IntStream.range(0, data.length)
                 .mapToObj((int j) -> data[j])
                 .collect(Collectors.toList());
