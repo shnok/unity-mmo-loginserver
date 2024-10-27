@@ -40,8 +40,10 @@ public interface ServerConfig extends Mutable, Reloadable {
     Integer accountInactiveLevel();
     @Key("server.show.license")
     Boolean showLicense();
-    @Key("rsa.padding.mode")
-    String rsaPaddingMode();
+    @Key("rsa.padding.mode.gameserver")
+    String gameserverRsaPaddingMode();
+    @Key("rsa.padding.mode.client")
+    String clientRsaPaddingMode();
 
     // Database
     @Key("database.jdbc.url")
