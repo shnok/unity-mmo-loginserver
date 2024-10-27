@@ -166,7 +166,7 @@ public class LoginClientThread extends Thread {
 
         try {
             synchronized (out) {
-                int len = packet.getData().length;
+                int len = packet.getData().length + 2;
                 out.write((byte)(len) & 0xff);
                 out.write((byte)((len) >> 8) & 0xff);
 
