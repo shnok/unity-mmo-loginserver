@@ -69,7 +69,6 @@ public abstract class ReceivablePacket extends Packet {
 
         byte[] data = new byte[end - start];
         System.arraycopy(packetData, start, data, 0, end - start);
-        System.out.println("Read string:"+ s + " : [" + (end - start) + "]: " + Arrays.toString(data));
         return s;
     }
 }
